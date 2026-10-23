@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#0b0b0e" />
+  <meta name="theme-color" content="#0a0a0c" />
   <meta name="color-scheme" content="light" />
   <meta name="description" content="iPerto — marketplace brasileiro especializado em iPhones. Encontre, anuncie e negocie aparelhos com fotos reais e informações completas." />
-  <meta property="og:title" content="iPerto — iPhones perto de você" />
-  <meta property="og:description" content="Marketplace especializado em iPhones, com anúncios reais e contato direto com o vendedor." />
+  <meta property="og:title" content="iPerto — o marketplace de iPhones" />
+  <meta property="og:description" content="Encontre seu próximo iPhone com fotos reais, ficha completa e contato direto com o vendedor." />
   <meta property="og:type" content="website" />
   <meta name="robots" content="index,follow" />
-  <title>iPerto — iPhones perto de você</title>
+  <title>iPerto — o marketplace de iPhones</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="preconnect" href="https://rrulyvkarrwbopqeciyz.supabase.co" crossorigin />
@@ -23,98 +23,156 @@
         <span class="brand-mark" aria-hidden="true"><span></span></span>
         <span class="brand-word"><b>i</b>Perto</span>
       </button>
-      <nav class="nav-actions" aria-label="Ações principais">
-        <button class="ghost" id="favoritesBtn" aria-pressed="false"><span class="nav-icon">♡</span><span>Favoritos</span></button>
-        <button class="ghost" id="accountBtn">Entrar</button>
-        <button class="primary small" id="sellBtn">＋ Vender iPhone</button>
+      <nav class="desktop-links" aria-label="Navegação principal">
+        <a href="#market">Comprar</a>
+        <a href="#confidence">Como funciona</a>
+        <button data-sell>Vender meu iPhone</button>
+      </nav>
+      <nav class="nav-actions" aria-label="Ações da conta">
+        <button class="ghost icon-action" id="favoritesBtn" aria-pressed="false"><span class="nav-icon">♡</span><span>Favoritos</span></button>
+        <button class="ghost account-action" id="accountBtn">Entrar</button>
+        <button class="primary small" id="sellBtn"><span class="plus">＋</span> Anunciar</button>
       </nav>
     </div>
   </header>
 
   <main>
-    <section class="hero">
-      <div class="hero-orb hero-orb-a"></div><div class="hero-orb hero-orb-b"></div>
-      <div class="shell hero-grid">
-        <div class="hero-copy">
-          <div class="eyebrow"><span></span> MARKETPLACE 100% IPHONE</div>
-          <h1>Seu próximo iPhone<br><em>está mais perto.</em></h1>
-          <p>Compre e venda iPhones com informações completas, fotos reais e contato direto com o vendedor.</p>
-          <div class="hero-search" role="search">
-            <div class="search-icon" aria-hidden="true">⌕</div>
-            <input id="heroSearch" autocomplete="off" placeholder="Buscar iPhone 15 Pro, 256 GB, sua cidade..." aria-label="Buscar anúncios" />
-            <button class="primary" id="heroSearchBtn">Buscar</button>
-          </div>
-          <div class="hero-trust" aria-label="Diferenciais do iPerto">
-            <span>✓ Só iPhones</span><span>✓ Fotos reais</span><span>✓ Dados do aparelho</span>
+    <section class="hero-wrap">
+      <div class="shell">
+        <div class="hero">
+          <div class="hero-noise"></div>
+          <div class="hero-glow glow-a"></div>
+          <div class="hero-glow glow-b"></div>
+          <div class="hero-grid">
+            <div class="hero-copy">
+              <div class="eyebrow"><span></span> O MARKETPLACE FEITO PARA IPHONE</div>
+              <h1>O iPhone certo.<br><em>Mais perto de você.</em></h1>
+              <p>Um marketplace especializado para comprar e vender iPhones com ficha completa do aparelho, fotos reais e negociação direta.</p>
+              <div class="hero-search" role="search">
+                <span class="search-symbol" aria-hidden="true"></span>
+                <input id="heroSearch" autocomplete="off" placeholder="Busque por modelo, armazenamento, cor ou cidade" aria-label="Buscar anúncios" />
+                <button class="search-submit" id="heroSearchBtn">Buscar iPhones <span>→</span></button>
+              </div>
+              <div class="hero-trust" aria-label="Diferenciais do iPerto">
+                <span><i>✓</i> Somente iPhones</span>
+                <span><i>✓</i> Fotos do aparelho real</span>
+                <span><i>✓</i> Ficha técnica detalhada</span>
+              </div>
+            </div>
+
+            <div class="showcase" aria-hidden="true">
+              <div class="showcase-card card-back">
+                <div class="mini-status">NOVO ANÚNCIO</div>
+                <div class="mini-phone phone-silver"><span class="camera c1"></span><span class="camera c2"></span><span class="camera c3"></span></div>
+              </div>
+              <div class="showcase-card card-front">
+                <div class="showcase-top"><span>Oferta em destaque</span><span class="heart-mini">♡</span></div>
+                <div class="hero-device phone-titanium"><span class="camera c1"></span><span class="camera c2"></span><span class="camera c3"></span></div>
+                <div class="showcase-info">
+                  <div><span>iPhone Pro</span><strong>256 GB</strong></div>
+                  <div class="showcase-specs"><span>🔋 92%</span><span>Titânio</span></div>
+                </div>
+              </div>
+              <div class="floating-stat stat-a"><span class="stat-dot green"></span><div><strong id="metricListings">0</strong><small>anúncios ativos</small></div></div>
+              <div class="floating-stat stat-b"><span class="stat-dot violet"></span><div><strong id="metricModels">—</strong><small>modelos no catálogo</small></div></div>
+            </div>
           </div>
         </div>
-        <div class="hero-card" aria-hidden="true">
-          <div class="hero-card-glow"></div>
-          <div class="device-art"><div class="phone p1"><div></div></div><div class="phone p2"><div></div></div></div>
-          <div class="floating-pill pill-one">Bateria verificada no anúncio</div>
-          <div class="floating-pill pill-two">Fotos do aparelho real</div>
-          <div class="hero-metrics">
-            <div><strong id="metricListings">0</strong><span>anúncios ativos</span></div>
-            <div><strong id="metricModels">36</strong><span>modelos no catálogo</span></div>
-          </div>
+
+        <div class="hero-bottom-rail">
+          <div><span class="rail-number">01</span><p><strong>Escolha seu modelo</strong><small>Catálogo exclusivo de iPhones</small></p></div>
+          <div><span class="rail-number">02</span><p><strong>Compare o aparelho</strong><small>Bateria, tela, reparos e acessórios</small></p></div>
+          <div><span class="rail-number">03</span><p><strong>Fale com o vendedor</strong><small>Negocie diretamente pelo anúncio</small></p></div>
         </div>
       </div>
     </section>
 
     <section class="market shell" id="market">
       <div class="section-head">
-        <div><span class="kicker" id="marketKicker">ENCONTRE O SEU</span><h2 id="marketTitle">iPhones anunciados agora</h2></div>
-        <div class="results" id="resultsLabel" aria-live="polite">Carregando...</div>
+        <div>
+          <span class="kicker" id="marketKicker">VITRINE IPERTO</span>
+          <h2 id="marketTitle">iPhones anunciados agora</h2>
+          <p class="section-subtitle">Compare aparelhos reais e encontre a melhor opção para você.</p>
+        </div>
+        <div class="results-pill" id="resultsLabel" aria-live="polite">Carregando...</div>
       </div>
 
-      <div class="filters" aria-label="Filtros de anúncios">
-        <select id="modelFilter" aria-label="Modelo"><option value="">Todos os modelos</option></select>
-        <select id="priceFilter" aria-label="Preço máximo">
-          <option value="">Qualquer preço</option><option value="2000">Até R$ 2.000</option><option value="3000">Até R$ 3.000</option>
-          <option value="4000">Até R$ 4.000</option><option value="5000">Até R$ 5.000</option><option value="7000">Até R$ 7.000</option><option value="10000">Até R$ 10.000</option>
-        </select>
-        <select id="batteryFilter" aria-label="Saúde mínima da bateria"><option value="">Qualquer bateria</option><option value="80">80%+</option><option value="85">85%+</option><option value="90">90%+</option><option value="95">95%+</option></select>
-        <input id="stateFilter" maxlength="2" placeholder="UF" aria-label="Estado" />
-        <label class="check"><input type="checkbox" id="shippingFilter" /> Envio</label>
-        <select id="sortFilter" aria-label="Ordenação"><option value="recent">Mais recentes</option><option value="price_asc">Menor preço</option><option value="price_desc">Maior preço</option><option value="battery">Melhor bateria</option></select>
-        <button class="filter-clear" id="clearFilters">Limpar</button>
+      <div class="filter-panel">
+        <div class="filter-panel-head">
+          <div><span class="filter-icon"></span><strong>Encontre o iPhone ideal</strong></div>
+          <button class="filter-clear" id="clearFilters">Limpar filtros</button>
+        </div>
+        <div class="filters" aria-label="Filtros de anúncios">
+          <label><span>Modelo</span><select id="modelFilter" aria-label="Modelo"><option value="">Todos os modelos</option></select></label>
+          <label><span>Preço</span><select id="priceFilter" aria-label="Preço máximo">
+            <option value="">Qualquer preço</option><option value="2000">Até R$ 2.000</option><option value="3000">Até R$ 3.000</option>
+            <option value="4000">Até R$ 4.000</option><option value="5000">Até R$ 5.000</option><option value="7000">Até R$ 7.000</option><option value="10000">Até R$ 10.000</option>
+          </select></label>
+          <label><span>Bateria</span><select id="batteryFilter" aria-label="Saúde mínima da bateria"><option value="">Qualquer bateria</option><option value="80">80% ou mais</option><option value="85">85% ou mais</option><option value="90">90% ou mais</option><option value="95">95% ou mais</option></select></label>
+          <label class="uf-field"><span>Estado</span><input id="stateFilter" maxlength="2" placeholder="UF" aria-label="Estado" /></label>
+          <label><span>Ordenar</span><select id="sortFilter" aria-label="Ordenação"><option value="recent">Mais recentes</option><option value="price_asc">Menor preço</option><option value="price_desc">Maior preço</option><option value="battery">Melhor bateria</option></select></label>
+          <label class="shipping-toggle"><input type="checkbox" id="shippingFilter" /><span class="toggle-ui"></span><span class="toggle-copy"><b>Aceita envio</b><small>Mostrar só anúncios com envio</small></span></label>
+        </div>
       </div>
 
       <div class="listing-grid" id="listingGrid" aria-live="polite"></div>
       <div class="empty hidden" id="emptyState">
-        <div class="empty-icon">⌁</div>
+        <div class="empty-visual"><span></span></div>
+        <span class="kicker">NENHUM RESULTADO</span>
         <h3 id="emptyTitle">Ainda não há anúncios com esses filtros</h3>
         <p id="emptyCopy">Seja o primeiro a anunciar um iPhone nessa busca.</p>
         <button class="primary" data-sell>Publicar meu iPhone</button>
       </div>
     </section>
 
-    <section class="safety-band">
-      <div class="shell safety-grid">
-        <div><span class="safety-icon">01</span><h3>Dados claros</h3><p>Bateria, tela, Face ID, câmeras, reparos e acessórios ficam descritos no anúncio.</p></div>
-        <div><span class="safety-icon">02</span><h3>Fotos reais</h3><p>Todo anúncio precisa ter ao menos uma foto enviada pelo próprio vendedor.</p></div>
-        <div><span class="safety-icon">03</span><h3>Privacidade primeiro</h3><p>WhatsApp só fica público quando o vendedor escolhe exibi-lo naquele anúncio.</p></div>
+    <section class="confidence" id="confidence">
+      <div class="shell confidence-grid">
+        <div class="confidence-copy">
+          <span class="kicker light">COMPRE COM MAIS CLAREZA</span>
+          <h2>Um anúncio de iPhone precisa mostrar o que realmente importa.</h2>
+          <p>No iPerto, o vendedor informa os principais detalhes do aparelho antes da negociação. Menos surpresa, mais contexto para decidir.</p>
+          <button class="light-button" data-sell>Quero vender meu iPhone <span>→</span></button>
+        </div>
+        <div class="confidence-cards">
+          <article><span class="confidence-index">01</span><div class="confidence-icon battery-icon"></div><h3>Bateria informada</h3><p>Saúde da bateria aparece de forma clara na ficha do anúncio.</p></article>
+          <article><span class="confidence-index">02</span><div class="confidence-icon camera-icon"></div><h3>Fotos reais</h3><p>O anúncio exige fotos enviadas pelo próprio vendedor.</p></article>
+          <article><span class="confidence-index">03</span><div class="confidence-icon shield-icon"></div><h3>Privacidade</h3><p>WhatsApp só é exibido quando o vendedor decide publicar.</p></article>
+          <article><span class="confidence-index">04</span><div class="confidence-icon detail-icon"></div><h3>Ficha detalhada</h3><p>Tela, Face ID, câmeras, reparos, caixa e nota podem ser informados.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="seller-cta">
+      <div class="shell seller-cta-card">
+        <div><span class="kicker">PARA QUEM VAI VENDER</span><h2>Seu iPhone merece um anúncio melhor.</h2><p>Cadastre as informações do aparelho, envie as fotos e publique sua oferta no marketplace.</p></div>
+        <button class="primary cta-button" data-sell>Começar anúncio <span>→</span></button>
       </div>
     </section>
   </main>
 
-  <footer><div class="shell footer-row"><div class="brand footer-brand"><span class="brand-mark"><span></span></span><span class="brand-word"><b>i</b>Perto</span></div><p>Marketplace especializado em iPhone • Brasil</p></div></footer>
+  <footer>
+    <div class="shell footer-main">
+      <div class="footer-brand-wrap"><div class="brand footer-brand"><span class="brand-mark"><span></span></span><span class="brand-word"><b>i</b>Perto</span></div><p>O marketplace especializado em iPhones.</p></div>
+      <div class="footer-links"><a href="#market">Comprar</a><button data-sell>Vender</button><a href="#confidence">Como funciona</a></div>
+    </div>
+    <div class="shell footer-bottom"><span>iPerto • Marketplace especializado em iPhone</span><span>Brasil</span></div>
+  </footer>
 
   <div class="modal-backdrop hidden" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
     <section class="modal auth-modal">
       <button class="modal-close" data-close="authModal" aria-label="Fechar">×</button>
       <div class="modal-brand"><span class="brand-mark"><span></span></span><span class="brand-word"><b>i</b>Perto</span></div>
-      <h2 class="sr-only" id="authTitle">Acessar iPerto</h2>
+      <div class="modal-intro"><span class="kicker">SUA CONTA</span><h2 id="authTitle">Entre no iPerto</h2><p>Salve favoritos, publique anúncios e gerencie seus iPhones.</p></div>
       <div class="tabs"><button class="tab active" data-auth-tab="login">Entrar</button><button class="tab" data-auth-tab="signup">Criar conta</button></div>
       <form id="loginForm" class="form-stack">
-        <label>E-mail<input type="email" name="email" required autocomplete="email"></label>
-        <label>Senha<input type="password" name="password" required minlength="6" autocomplete="current-password"></label>
+        <label>E-mail<input type="email" name="email" required autocomplete="email" placeholder="voce@email.com"></label>
+        <label>Senha<input type="password" name="password" required minlength="6" autocomplete="current-password" placeholder="Sua senha"></label>
         <button class="primary wide" type="submit">Entrar no iPerto</button>
       </form>
       <form id="signupForm" class="form-stack hidden">
-        <label>Seu nome<input name="display_name" required minlength="2" maxlength="60" autocomplete="name"></label>
-        <label>E-mail<input type="email" name="email" required autocomplete="email"></label>
-        <label>Senha<input type="password" name="password" required minlength="6" autocomplete="new-password"></label>
+        <label>Seu nome<input name="display_name" required minlength="2" maxlength="60" autocomplete="name" placeholder="Como quer aparecer"></label>
+        <label>E-mail<input type="email" name="email" required autocomplete="email" placeholder="voce@email.com"></label>
+        <label>Senha<input type="password" name="password" required minlength="6" autocomplete="new-password" placeholder="Mínimo de 6 caracteres"></label>
         <button class="primary wide" type="submit">Criar minha conta</button>
         <small>Para sua segurança, o Supabase pode solicitar a confirmação do e-mail antes do primeiro acesso.</small>
       </form>
@@ -124,9 +182,9 @@
   <div class="modal-backdrop hidden" id="sellModal" role="dialog" aria-modal="true" aria-labelledby="sellTitle">
     <section class="modal sell-modal">
       <button class="modal-close" data-close="sellModal" aria-label="Fechar">×</button>
-      <div class="sell-head"><div><span class="kicker">NOVO ANÚNCIO</span><h2 id="sellTitle">Venda seu iPhone</h2><p>Preencha com transparência. Isso aumenta a confiança de quem compra.</p></div><span class="secure-chip">🔒 conta autenticada</span></div>
+      <div class="sell-head"><div><span class="kicker">NOVO ANÚNCIO</span><h2 id="sellTitle">Anuncie seu iPhone</h2><p>Uma ficha completa transmite mais confiança para quem está comprando.</p></div><span class="secure-chip"><i></i> conta autenticada</span></div>
       <form id="sellForm">
-        <div class="form-section-title"><span>1</span> Aparelho</div>
+        <div class="form-section-title"><span>1</span><div><strong>Dados do aparelho</strong><small>Conte exatamente qual iPhone você está vendendo.</small></div></div>
         <div class="form-grid">
           <label>Modelo<select name="model_id" id="sellModel" required></select></label>
           <label>Armazenamento<select name="storage_gb" required><option>64</option><option selected>128</option><option>256</option><option>512</option><option>1024</option><option>2048</option></select></label>
@@ -142,21 +200,21 @@
         <label>Histórico de manutenção<textarea name="repair_history" rows="2" maxlength="500" placeholder="Conte se já houve troca de bateria, tela ou reparos."></textarea></label>
         <label>Acessórios<textarea name="accessories" rows="2" maxlength="300" placeholder="Carregador, cabo, capinha..."></textarea></label>
 
-        <div class="form-section-title"><span>2</span> Preço e entrega</div>
+        <div class="form-section-title"><span>2</span><div><strong>Preço e entrega</strong><small>Defina como o comprador poderá negociar e receber.</small></div></div>
         <div class="form-grid">
           <label>Preço (R$)<input type="number" name="price" required min="1" max="100000" step="0.01" placeholder="3990"></label>
-          <label>Cidade<input name="city" required minlength="2" maxlength="80" autocomplete="address-level2"></label>
-          <label>UF<input name="state" required maxlength="2" minlength="2" class="upper" autocomplete="address-level1"></label>
+          <label>Cidade<input name="city" required minlength="2" maxlength="80" autocomplete="address-level2" placeholder="Sua cidade"></label>
+          <label>UF<input name="state" required maxlength="2" minlength="2" class="upper" autocomplete="address-level1" placeholder="SP"></label>
           <label>WhatsApp<input name="whatsapp" inputmode="tel" maxlength="20" placeholder="11999999999" autocomplete="tel"></label>
         </div>
         <div class="toggle-row">
           <label><input type="checkbox" name="negotiable"> Aceita proposta</label><label><input type="checkbox" name="shipping_enabled"> Faz envio</label><label><input type="checkbox" name="pickup_enabled" checked> Aceita retirada</label>
         </div>
-        <label class="privacy-choice"><input type="checkbox" name="publish_whatsapp"><span><strong>Exibir meu WhatsApp publicamente neste anúncio</strong><small>Desmarcado por padrão. Se não marcar, o número fica somente no seu perfil privado.</small></span></label>
+        <label class="privacy-choice"><input type="checkbox" name="publish_whatsapp"><span><strong>Exibir meu WhatsApp neste anúncio</strong><small>Desmarcado por padrão. Se não marcar, o número permanece privado.</small></span></label>
         <label>Descrição<textarea name="description" rows="4" maxlength="1000" placeholder="Estado do aparelho, marcas de uso e qualquer detalhe importante."></textarea></label>
 
-        <div class="form-section-title"><span>3</span> Fotos reais</div>
-        <label class="upload-zone">Fotos do aparelho
+        <div class="form-section-title"><span>3</span><div><strong>Fotos do aparelho</strong><small>Mostre o iPhone real que será vendido.</small></div></div>
+        <label class="upload-zone"><span class="upload-icon">＋</span><strong>Adicionar fotos reais</strong>
           <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple required>
           <span>Escolha de 1 a 8 fotos • máx. 10 MB cada • JPG, PNG, WebP ou HEIC</span>
         </label>
@@ -171,8 +229,8 @@
   <div class="modal-backdrop hidden" id="reportModal" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
     <section class="modal report-modal"><button class="modal-close" data-close="reportModal" aria-label="Fechar">×</button><span class="kicker">SEGURANÇA</span><h2 id="reportTitle">Denunciar anúncio</h2><p class="detail-copy">A denúncia fica vinculada à sua conta e não é exibida publicamente.</p><form id="reportForm" class="form-stack"><input type="hidden" name="listing_id"><label>Motivo<select name="reason" required><option value="">Selecione</option><option value="suspeita_fraude">Suspeita de fraude</option><option value="informacao_falsa">Informação falsa</option><option value="produto_indisponivel">Produto indisponível</option><option value="conteudo_inadequado">Conteúdo inadequado</option><option value="outro">Outro</option></select></label><label>Detalhes<textarea name="details" rows="4" maxlength="500" placeholder="Conte o que aconteceu."></textarea></label><button class="primary wide" type="submit">Enviar denúncia</button></form></section>
   </div>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script type="module" src="/app.js"></script>
 </body>
 </html>
