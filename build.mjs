@@ -1,6 +1,7 @@
-import { mkdirSync, readFileSync, writeFileSync, copyFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync, copyFileSync, rmSync, cpSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 
+rmSync('dist', { recursive: true, force: true });
 mkdirSync('dist', { recursive: true });
 
 for (const [source, target] of [
@@ -8,21 +9,11 @@ for (const [source, target] of [
   ['source/styles.css.gz', 'dist/styles.css'],
   ['source/app.js.gz', 'dist/app.js'],
 ]) {
-  const packed = readFileSync(source);
-  writeFileSync(target, gunzipSync(packed));
+  writeFileSync(target, gunzipSync(readFileSync(source)));
 }
 
-copyFileSync('ui-refine.css', 'dist/ui-refine.css');
 copyFileSync('favicon.svg', 'dist/favicon.svg');
 copyFileSync('manifest.webmanifest', 'dist/manifest.webmanifest');
+cpSync('assets', 'dist/assets', { recursive: true });
 
-let html = readFileSync('dist/index.html', 'utf8');
-if (!html.includes('ui-refine.css')) {
-  html = html.replace('</head>', '  <link rel="stylesheet" href="/ui-refine.css?v=4">\n</head>');
-}
-if (!/viewport-fit=cover/.test(html)) {
-  html = html.replace(/<meta\s+name=["']viewport["'][^>]*>/i, '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">');
-}
-writeFileSync('dist/index.html', html);
-
-console.log('Junta static build ready with premium responsive UI');
+console.log('Junta V2 static build ready');
