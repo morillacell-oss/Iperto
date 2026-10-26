@@ -11,11 +11,14 @@ if (!html.includes('assets-fix.css')) {
   html = html.replace('</head>', '  <link rel="stylesheet" href="/assets-fix.css?v=2">\n</head>');
 }
 if (!html.includes('categories-ui.css')) {
-  html = html.replace('</head>', '  <link rel="stylesheet" href="/categories-ui.css?v=21">\n</head>');
+  html = html.replace('</head>', '  <link rel="stylesheet" href="/categories-ui.css?v=30">\n</head>');
+}
+if (!html.includes('identity-v30.css')) {
+  html = html.replace('</head>', '  <link rel="stylesheet" href="/identity-v30.css?v=30">\n</head>');
 }
 if (!html.includes('categories-ui.js')) {
-  html = html.replace('</body>', '  <script src="/categories-ui.js?v=21"></script>\n</body>');
+  html = html.replace('</body>', '  <script src="/categories-ui.js?v=30"></script>\n</body>');
 }
 writeFileSync('dist/index.html', html);
 
-console.log('Junta marketplace categories build ready');
+console.log('Junta V30 identity build ready');
