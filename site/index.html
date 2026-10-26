@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#fff9f6" />
+  <meta name="description" content="Junta — pessoas comprando juntas para pagar menos." />
+  <title>Junta — Compre junto. Pague menos.</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="stylesheet" href="/styles.css?v=8" />
+</head>
+<body>
+  <div class="ambient ambient-a" aria-hidden="true"></div>
+  <div class="ambient ambient-b" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="topbar-inner shell">
+      <button class="brand" data-nav="home" aria-label="Ir para início">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i></span>
+        <span>JUNTA</span>
+      </button>
+      <button class="location-chip" aria-label="Localização atual">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s6-5.3 6-11a6 6 0 1 0-12 0c0 5.7 6 11 6 11Zm0-8.3a2.7 2.7 0 1 0 0-5.4 2.7 2.7 0 0 0 0 5.4Z"/></svg>
+        <span>São Paulo</span>
+      </button>
+      <div class="top-actions">
+        <button class="icon-btn" id="searchTrigger" aria-label="Buscar ofertas">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.4-4.4m2.4-5.6a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/></svg>
+        </button>
+        <button class="account-pill" data-nav="account">
+          <span class="avatar-mini">M</span><span class="account-label">Entrar</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="app">
+    <section class="view active" data-view="home">
+      <div class="shell">
+        <section class="hero reveal">
+          <div class="hero-copy">
+            <div class="eyebrow"><span class="live-dot"></span> Compra coletiva, preço melhor</div>
+            <h1>Compre junto.<br><span>Pague menos.</span></h1>
+            <p>Você escolhe uma oferta, entra na fila e o Junta reúne compradores. Quando o grupo fecha, todo mundo destrava o preço.</p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" data-scroll="offers">Ver ofertas <span>↘</span></button>
+              <button class="btn btn-quiet" data-scroll="how">Como funciona</button>
+            </div>
+            <div class="trust-row">
+              <span><b>✓</b> Sem pagar para entrar</span>
+              <span><b>✓</b> Pagamento no parceiro</span>
+              <span><b>✓</b> Retirada simples</span>
+            </div>
+          </div>
+          <div class="hero-visual" aria-hidden="true">
+            <div class="hero-halo"></div>
+            <div class="art art-collective float-a"></div>
+            <div class="mini-stat mini-stat-a"><strong>+38%</strong><span>economia média*</span></div>
+            <div class="mini-stat mini-stat-b"><strong>24</strong><span>na fila agora</span></div>
+          </div>
+        </section>
+
+        <section class="drop-banner reveal" id="dropBanner">
+          <div class="drop-copy">
+            <span class="drop-kicker">🔥 SEXTA DO JUNTA</span>
+            <h2>Um horário. Várias ofertas.<br>Preço de grupo.</h2>
+            <p>Entre na fila durante a semana. Na sexta, quem estiver dentro recebe primeiro.</p>
+          </div>
+          <div class="countdown-card">
+            <span>Próxima abertura</span>
+            <strong id="countdown">00 : 00 : 00</strong>
+            <em>sexta, 18h</em>
+          </div>
+          <div class="art art-flash drop-art" aria-hidden="true"></div>
+        </section>
+
+        <section class="section" id="offers">
+          <div class="section-head reveal">
+            <div>
+              <span class="section-kicker">Ofertas em destaque</span>
+              <h2>Quanto mais gente,<br>melhor o preço.</h2>
+            </div>
+            <button class="text-link" data-nav="offers">Ver todas <span>→</span></button>
+          </div>
+
+          <div class="category-strip reveal" id="categoryStrip">
+            <button class="category active" data-category="all"><span class="cat-icon">✦</span> Tudo</button>
+            <button class="category" data-category="comida"><span class="cat-art cat-food"></span> Comida</button>
+            <button class="category" data-category="mercado"><span class="cat-art cat-market"></span> Mercado</button>
+            <button class="category" data-category="moda"><span class="cat-art cat-fashion"></span> Moda</button>
+            <button class="category" data-category="beleza"><span class="cat-icon">✧</span> Beleza</button>
+          </div>
+
+          <div class="offer-grid" id="homeOffers">
+            <div class="offer-skeleton"></div><div class="offer-skeleton"></div>
+          </div>
+        </section>
+
+        <section class="how section reveal" id="how">
+          <div class="how-copy">
+            <span class="section-kicker">É simples</span>
+            <h2>Você entra por um.<br>O grupo compra por muitos.</h2>
+            <p>O comércio define a quantidade que viabiliza o desconto. O Junta monta uma fila maior para sobrar margem caso alguém desista.</p>
+            <div class="formula">
+              <div><span>Mínimo</span><b>15</b></div><i>→</i><div><span>À venda</span><b>20</b></div><i>→</i><div class="formula-hot"><span>Fila</span><b>25+</b></div>
+            </div>
+          </div>
+          <div class="step-stack">
+            <article class="step-card"><div class="step-num">01</div><div class="art art-queue step-art"></div><div><h3>Entre na fila</h3><p>Mostre interesse sem pagar nada. Você só precisa decidir quando a oferta abrir.</p></div></article>
+            <article class="step-card"><div class="step-num">02</div><div class="art art-unlock step-art"></div><div><h3>Receba o aviso</h3><p>Quando a fila tiver gente suficiente, o pagamento é liberado para o grupo.</p></div></article>
+            <article class="step-card"><div class="step-num">03</div><div class="art art-secure step-art"></div><div><h3>Pague com segurança</h3><p>Checkout no parceiro de pagamento. O Junta não guarda número de cartão nem CVV.</p></div></article>
+            <article class="step-card"><div class="step-num">04</div><div class="art art-pickup step-art"></div><div><h3>Retire com voucher</h3><p>Pagamento aprovado, voucher liberado. Mostre o QR no estabelecimento e pronto.</p></div></article>
+          </div>
+        </section>
+
+        <section class="seller-teaser reveal">
+          <div class="seller-copy">
+            <span class="section-kicker">Para quem vende</span>
+            <h2>Troque desconto por<br><span>volume de verdade.</span></h2>
+            <p>Crie uma oferta, escolha mínimo, limite e horário. O Junta organiza a fila e mostra a procura antes da venda.</p>
+            <button class="btn btn-primary" data-nav="seller">Conhecer Junta Empresas <span>→</span></button>
+          </div>
+          <div class="seller-visual">
+            <div class="art art-merchant"></div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="view" data-view="offers">
+      <div class="shell page-shell">
+        <div class="page-title reveal"><span class="section-kicker">Explorar</span><h1>Ofertas perto de você.</h1><p>Entre na fila das compras que fazem sentido para você.</p></div>
+        <div class="search-box reveal"><svg viewBox="0 0 24 24"><path d="m21 21-4.4-4.4m2.4-5.6a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/></svg><input id="offerSearch" placeholder="Buscar produto ou loja" autocomplete="off"><button id="clearSearch" aria-label="Limpar">×</button></div>
+        <div class="category-strip reveal" id="allCategoryStrip">
+          <button class="category active" data-category="all">Tudo</button><button class="category" data-category="comida">🍔 Comida</button><button class="category" data-category="mercado">🛒 Mercado</button><button class="category" data-category="moda">👟 Moda</button><button class="category" data-category="beleza">✧ Beleza</button>
+        </div>
+        <div class="offer-grid offer-grid-full" id="allOffers"></div>
+      </div>
+    </section>
+
+    <section class="view" data-view="seller">
+      <div class="shell page-shell">
+        <section class="seller-hero reveal">
+          <div><span class="section-kicker">Junta Empresas</span><h1>Venda volume.<br><span>Não só desconto.</span></h1><p>Descubra a demanda antes, abra um lote coletivo e transforme interesse em pedidos reais.</p><div class="hero-actions"><button class="btn btn-primary" id="newOfferBtn">Criar minha oferta</button><button class="btn btn-quiet" id="sellerDemoBtn">Ver painel</button></div></div>
+          <div class="art art-merchant seller-hero-art"></div>
+        </section>
+        <section class="seller-dashboard reveal" id="sellerDashboard">
+          <div class="dash-top"><div><small>JUNTA EMPRESAS</small><h2>Visão da semana</h2></div><span class="online"><i></i> ao vivo</span></div>
+          <div class="metric-grid"><div><span>Na fila</span><strong>184</strong><em>+26 hoje</em></div><div><span>Meta do lote</span><strong>60</strong><em>308% interesse</em></div><div><span>Potencial</span><strong>R$ 3,4 mil</strong><em>neste lote</em></div></div>
+          <div class="mini-chart" aria-label="Gráfico de crescimento"><i style="--h:24%"></i><i style="--h:38%"></i><i style="--h:54%"></i><i style="--h:72%"></i><i style="--h:92%"></i></div>
+          <div class="dash-offer"><div><span class="offer-dot"></span><div><b>Oferta de sexta</b><small>Combo Smash • 18h</small></div></div><strong>184 interessados</strong></div>
+        </section>
+        <section class="seller-benefits section reveal">
+          <article><span>01</span><h3>Você define a regra</h3><p>Preço, mínimo viável, unidades e horário. Sem depender do Junta para cadastrar manualmente.</p></article>
+          <article><span>02</span><h3>A fila prova a demanda</h3><p>Veja quantas pessoas demonstraram interesse antes de liberar pagamento.</p></article>
+          <article><span>03</span><h3>O pagamento é separado</h3><p>A integração financeira fica com um parceiro especializado e o split pode repassar sua parte.</p></article>
+        </section>
+      </div>
+    </section>
+
+    <section class="view" data-view="account">
+      <div class="shell account-page">
+        <div class="account-panel reveal">
+          <div class="account-art-wrap"><div class="art art-secure"></div></div>
+          <div class="account-copy"><span class="section-kicker">Sua conta Junta</span><h1>Entre para acompanhar suas filas.</h1><p>Favoritos, ofertas que você entrou e vouchers ficam organizados em um só lugar.</p>
+            <form id="authForm" class="auth-form">
+              <label>E-mail<input type="email" id="authEmail" placeholder="voce@email.com" required></label>
+              <label>Senha<input type="password" id="authPassword" minlength="6" placeholder="Mínimo 6 caracteres" required></label>
+              <button class="btn btn-primary" type="submit">Entrar</button>
+              <button class="btn btn-outline" type="button" id="signupBtn">Criar conta</button>
+            </form>
+            <p class="auth-note">Pagamento não acontece nesta tela. Seus dados de cartão ficam com o parceiro de checkout.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Navegação principal">
+    <button class="nav-item active" data-nav="home"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5V21h-6v-6H9v6H3v-9.5Z"/></svg><span>Início</span></button>
+    <button class="nav-item" data-nav="offers"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 5v14m8-14v14"/></svg><span>Ofertas</span></button>
+    <button class="nav-item" data-nav="seller"><svg viewBox="0 0 24 24"><path d="M4 10h16l-1.2-5H5.2L4 10Zm1 0v9h14v-9M8 19v-5h4v5"/></svg><span>Vender</span></button>
+    <button class="nav-item" data-nav="account"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7 8a7 7 0 0 0-14 0"/></svg><span>Conta</span></button>
+  </nav>
+
+  <div class="sheet-backdrop" id="sheetBackdrop"></div>
+  <aside class="offer-sheet" id="offerSheet" aria-hidden="true">
+    <button class="sheet-close" id="sheetClose" aria-label="Fechar">×</button>
+    <div id="sheetContent"></div>
+  </aside>
+
+  <div class="modal-backdrop" id="modalBackdrop"></div>
+  <div class="seller-modal" id="sellerModal" aria-hidden="true">
+    <button class="sheet-close" id="sellerClose">×</button>
+    <span class="section-kicker">Nova oferta</span><h2>Monte seu lote coletivo.</h2><p>Esse formulário cria um rascunho visual nesta V1.</p>
+    <form id="sellerForm" class="seller-form">
+      <label>Produto<input name="title" required placeholder="Ex.: Combo Smash"></label>
+      <div class="form-row"><label>Preço normal<input name="regular" type="number" step="0.01" required placeholder="42,00"></label><label>Preço Junta<input name="junta" type="number" step="0.01" required placeholder="27,90"></label></div>
+      <div class="form-row"><label>Mínimo viável<input name="minimum" type="number" required value="15"></label><label>Unidades à venda<input name="units" type="number" required value="20"></label></div>
+      <label>Fila de segurança<input name="queue" type="number" required value="25"></label>
+      <button class="btn btn-primary" type="submit">Salvar rascunho</button>
+    </form>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="/app.js?v=8" defer></script>
+</body>
+</html>
