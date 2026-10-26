@@ -1,5 +1,5 @@
 {
-  "buildCommand": "node build.mjs",
+  "buildCommand": "mkdir -p dist && gzip -dc source/index.html.gz > dist/index.html && gzip -dc source/styles.css.gz > dist/styles.css && gzip -dc source/app.js.gz > dist/app.js && cp favicon.svg manifest.webmanifest dist/",
   "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": false,
