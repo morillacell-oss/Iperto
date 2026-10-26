@@ -16,9 +16,15 @@ if (!html.includes('categories-ui.css')) {
 if (!html.includes('identity-v30.css')) {
   html = html.replace('</head>', '  <link rel="stylesheet" href="/identity-v30.css?v=30">\n</head>');
 }
+if (!html.includes('identity-v31.css')) {
+  html = html.replace('</head>', '  <link rel="stylesheet" href="/identity-v31.css?v=31">\n</head>');
+}
 if (!html.includes('categories-ui.js')) {
   html = html.replace('</body>', '  <script src="/categories-ui.js?v=30"></script>\n</body>');
 }
+if (!html.includes('polish-v31.js')) {
+  html = html.replace('</body>', '  <script src="/polish-v31.js?v=31"></script>\n</body>');
+}
 writeFileSync('dist/index.html', html);
 
-console.log('Junta V30 identity build ready');
+console.log('Junta V31 final visual refinement ready');
