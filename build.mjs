@@ -4,9 +4,9 @@ import { gunzipSync } from 'node:zlib';
 mkdirSync('dist', { recursive: true });
 
 for (const [source, target] of [
-  ['.source/index.html.gz', 'dist/index.html'],
-  ['.source/styles.css.gz', 'dist/styles.css'],
-  ['.source/app.js.gz', 'dist/app.js'],
+  ['source/index.html.gz', 'dist/index.html'],
+  ['source/styles.css.gz', 'dist/styles.css'],
+  ['source/app.js.gz', 'dist/app.js'],
 ]) {
   writeFileSync(target, gunzipSync(readFileSync(source)));
 }
