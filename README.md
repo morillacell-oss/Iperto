@@ -1,25 +1,16 @@
-# iPerto
+# Junta — V1
 
-Marketplace brasileiro especializado exclusivamente em iPhones.
+Marketplace de compras coletivas: pessoas entram em uma fila, o comércio ganha volume e a oferta abre quando existe demanda suficiente.
 
-## Produção
+## V1
+- Feed público de ofertas semanais.
+- Fila sem pagamento antecipado.
+- Conta de comprador com filas e favoritos.
+- Junta Empresas: cadastro do negócio, criação de oferta e métricas.
+- Junta Admin: aprovação de empresas e ofertas (somente perfil `admin`).
+- Supabase Auth, RLS e Storage.
+- Nenhum dado de cartão é armazenado pelo Junta.
+- Checkout real ainda não está conectado; o schema de pedidos está preparado para integração com PSP.
 
-- **Frontend:** HTML/CSS/JavaScript modular, publicado pela Vercel.
-- **Backend:** Supabase dedicado (Auth, Postgres e Storage).
-- **Fonte oficial:** este repositório GitHub. Toda alteração deve ser versionada aqui antes do deploy.
-- **Dados:** somente anúncios reais; não há cards demonstrativos ou dados fictícios.
-
-## Segurança
-
-- Row Level Security em todas as tabelas expostas.
-- Perfis de conta são privados; o vendedor controla por anúncio se quer publicar o WhatsApp.
-- A chave usada no navegador é somente a `sb_publishable_...`; nenhuma chave `service_role`/secret é versionada.
-- Uploads são limitados por bucket, MIME, tamanho e pasta do usuário autenticado.
-- Usuários só podem editar, pausar ou excluir os próprios anúncios.
-- A coluna `verified` do perfil não pode ser alterada pelo próprio usuário.
-- Headers de produção incluem CSP, HSTS, frame protection, referrer policy e permissions policy.
-- Conteúdo vindo de usuários é escapado antes de ser renderizado em HTML.
-
-## Banco
-
-As migrações ficam em `supabase/migrations/` e documentam a estrutura aplicada ao projeto dedicado do iPerto.
+## Stack
+Frontend estático + Supabase + Vercel. Os três arquivos maiores do frontend ficam compactados em `.source/`; `npm run build` os materializa em `dist/` sem instalar dependências externas.
