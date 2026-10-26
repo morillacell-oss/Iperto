@@ -1,1 +1,2 @@
 .art,.cat-art{background-image:url('/assets/junta-assets.svg')!important;background-repeat:no-repeat;background-size:500% 200%}
+@media(max-width:600px){.step-card{position:relative}.step-num{top:14px;left:14px}.hero-visual,.seller-visual,.account-art-wrap{isolation:isolate}}
