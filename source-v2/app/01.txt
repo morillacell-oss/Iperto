@@ -1,0 +1,46 @@
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.78.0/+esm';
+
+const SUPABASE_URL='https://rrulyvkarrwbopqeciyz.supabase.co';
+const SUPABASE_KEY='sb_publishable_PGO2G81WqwkxOEeQO-CI8A_YjXtUhiU';
+const supabase=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
+
+const $=(s,p=document)=>p.querySelector(s); const $$=(s,p=document)=>[...p.querySelectorAll(s)];
+const money=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v||0));
+const escapeHTML=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const state={offers:[],businesses:new Map(),stats:new Map(),category:'todos',session:null,profile:null};
+
+function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),2600)}
+function openModal(id){const el=$('#'+id);el.classList.add('open');el.setAttribute('aria-hidden','false');document.body.style.overflow='hidden'}
+function closeModal(id){const el=$('#'+id);el.classList.remove('open');el.setAttribute('aria-hidden','true');document.body.style.overflow=''}
+$$('[data-close]').forEach(el=>el.addEventListener('click',()=>closeModal(el.dataset.close)));
+$$('[data-scroll]').forEach(el=>el.addEventListener('click',()=>$(el.dataset.scroll)?.scrollIntoView({behavior:'smooth'})));
+
+function initReveal(){const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target)}}),{threshold:.12});$$('.reveal').forEach(el=>obs.observe(el))}
+function initHeader(){const h=$('#topbar');addEventListener('scroll',()=>h.classList.toggle('scrolled',scrollY>20),{passive:true});const links=$$('.mobile-dock a');const secs=['#inicio','#ofertas'];const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id))}}),{threshold:.35});secs.forEach(s=>$(s)&&io.observe($(s)))}
+function initHeroMotion(){const v=$('#heroVisual');if(!v||matchMedia('(pointer:coarse)').matches)return;v.addEventListener('pointermove',e=>{const r=v.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;v.style.transform=`perspective(900px) rotateY(${x*4}deg) rotateX(${-y*4}deg)`});v.addEventListener('pointerleave',()=>v.style.transform='')}
+
+function countdown(){const el=$('#countdown'),lbl=$('#countdownLabel');const getNext=()=>{const now=new Date();let d=new Date(now);let delta=(5-now.getDay()+7)%7;if(delta===0&&(now.getHours()>18||(now.getHours()===18&&now.getMinutes()>=0)))delta=7;d.setDate(now.getDate()+delta);d.setHours(18,0,0,0);return d};const target=getNext();const tick=()=>{const ms=Math.max(0,target-new Date()),h=Math.floor(ms/36e5),m=Math.floor(ms%36e5/6e4),s=Math.floor(ms%6e4/1e3);el.textContent=[h,m,s].map(n=>String(n).padStart(2,'0')).join(' : ');lbl.textContent='sexta, 18h'};tick();setInterval(tick,1000)}
+
+async function loadOffers(){
+  $('#offersStatus').style.display='block';
+  const [{data:offers,error},{data:businesses},{data:stats}]=await Promise.all([
+    supabase.from('offers').select('*').in('status',['scheduled','open','closed','sold_out']).order('featured',{ascending:false}).order('opens_at',{ascending:true}),
+    supabase.from('businesses').select('*').eq('status','approved'),
+    supabase.from('offer_stats').select('*')
+  ]);
+  if(error){console.error(error);$('#offersStatus').innerHTML='Não conseguimos carregar as ofertas agora.';return}
+  state.offers=offers||[];(businesses||[]).forEach(b=>state.businesses.set(b.id,b));(stats||[]).forEach(s=>state.stats.set(s.offer_id,s));
+  $('#offersStatus').style.display='none';
+  const total=state.offers.reduce((sum,o)=>sum+Number(state.stats.get(o.id)?.waitlist_count||o.demo_seed_count||0),0);$('#heroQueue').textContent=total||175;
+  renderOffers();
+}
+function queueCount(o){return Number(state.stats.get(o.id)?.waitlist_count||0)+Number(o.demo_seed_count||0)}
+function offerCard(o){const b=state.businesses.get(o.business_id)||{};const q=queueCount(o),target=Math.max(1,Number(o.queue_target||o.max_units||1));const pct=Math.min(100,Math.round(q/target*100));const save=Math.max(0,Math.round((1-Number(o.junta_price)/Number(o.regular_price))*100));return `<article class="offer-card reveal in" data-offer="${o.id}">
+  <div class="offer-media"><img src="${escapeHTML(o.image_url||'/assets/collective.png')}" alt="${escapeHTML(o.title)}" loading="lazy"><div class="offer-badges"><span class="badge">SEXTA • 18H</span><span class="badge badge-save">-${save}%</span></div></div>
+  <div class="offer-body"><div class="store-line"><span>${escapeHTML(b.name||'Parceiro Junta')} • ${escapeHTML(b.city||'')}</span>${b.verified?'<span class="verified">✓</span>':''}</div><h3>${escapeHTML(o.title)}</h3><div class="price-row"><span class="old-price">${money(o.regular_price)}</span><span class="junta-price">${money(o.junta_price)}</span></div><div class="queue-line"><span><b>${q}</b> na fila</span><span>${pct}% da fila ideal</span></div><div class="progress"><i style="width:${pct}%"></i></div><button class="offer-action" type="button">Ver oferta</button></div></article>`}
+function renderOffers(){const grid=$('#offersGrid');const list=state.offers.filter(o=>state.category==='todos'||o.category===state.category);if(!list.length){grid.innerHTML=`<div class="empty-state"><div class="empty-spark">✦</div><h3>Nenhuma oferta nessa categoria ainda.</h3><p>Quando uma empresa publicar, ela aparece aqui automaticamente.</p></div>`;return}grid.innerHTML=list.map(offerCard).join('');$$('.offer-card',grid).forEach(c=>c.addEventListener('click',()=>showOffer(c.dataset.offer)))}
+$$('.category').forEach(b=>b.addEventListener('click',()=>{$$('.category').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.category=b.dataset.category;renderOffers()}));
+
+function showOffer(id){const o=state.offers.find(x=>x.id===id);if(!o)return;const b=state.businesses.get(o.business_id)||{},q=queueCount(o),target=Number(o.queue_target||o.max_units||1),pct=Math.min(100,Math.round(q/target*100)),save=Math.max(0,Math.round((1-Number(o.junta_price)/Number(o.regular_price))*100));$('#offerModalContent').innerHTML=`<img class="modal-hero-img" src="${escapeHTML(o.image_url||'/assets/collective.png')}" alt="${escapeHTML(o.title)}"><div class="modal-store">${escapeHTML(b.name||'Parceiro Junta')} ${b.verified?'• ✓ verificado':''}</div><h2 class="modal-title">${escapeHTML(o.title)}</h2><div class="modal-price"><span class="old-price">${money(o.regular_price)}</span><strong>${money(o.junta_price)}</strong><span class="badge badge-save">-${save}%</span></div><div class="modal-info-grid"><div><small>MÍNIMO</small><b>${o.min_paid}</b></div><div><small>UNIDADES</small><b>${o.max_units}</b></div><div><small>FILA IDEAL</small><b>${o.queue_target}</b></div></div><div class="queue-line"><span><b>${q}</b> pessoas interessadas</span><span>${pct}%</span></div><div class="progress"><i style="width:${pct}%"></i></div><p style="color:var(--muted);line-height:1.6">${escapeHTML(o.description||'Entre na fila sem pagar. Quando a rodada abrir, o Junta avisa e quem confirmar primeiro garante.')}</p><button class="join-btn" id="joinWaitlist">Entrar na fila sem pagar</button>`;openModal('offerModal');$('#joinWaitlist').addEventListener('click',()=>joinWaitlist(o))}
+
+async function joinWaitl
