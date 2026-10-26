@@ -7,14 +7,15 @@ copyFileSync('favicon.svg', 'dist/favicon.svg');
 copyFileSync('manifest.webmanifest', 'dist/manifest.webmanifest');
 
 let html = readFileSync('dist/index.html', 'utf8');
-html = html.replace('/styles.css?v=8', '/styles.css?v=10');
-html = html.replace('+38%', 'Fila');
-html = html.replace('economia média*', 'sem pagar');
 if (!html.includes('assets-fix.css')) {
   html = html.replace('</head>', '  <link rel="stylesheet" href="/assets-fix.css?v=2">\n</head>');
-} else {
-  html = html.replace('/assets-fix.css?v=1', '/assets-fix.css?v=2');
+}
+if (!html.includes('categories-ui.css')) {
+  html = html.replace('</head>', '  <link rel="stylesheet" href="/categories-ui.css?v=21">\n</head>');
+}
+if (!html.includes('categories-ui.js')) {
+  html = html.replace('</body>', '  <script src="/categories-ui.js?v=21"></script>\n</body>');
 }
 writeFileSync('dist/index.html', html);
 
-console.log('Junta V3 visual refresh ready');
+console.log('Junta marketplace categories build ready');
