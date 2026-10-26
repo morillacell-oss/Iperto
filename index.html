@@ -1,21 +1,228 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#fff8f5">
-  <meta name="description" content="Junta — pessoas se juntam para comprar mais barato e o comércio vende em volume.">
-  <title>Junta — juntos a gente paga menos</title>
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="stylesheet" href="/bootstrap.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#ff3b36" />
+  <meta name="description" content="Junta pessoas, destrava preço. Compra coletiva com preço de atacado sem precisar comprar em quantidade sozinho." />
+  <title>Junta — Compre junto. Pague menos.</title>
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="stylesheet" href="/styles.css?v=6" />
 </head>
 <body>
-  <main class="boot" id="boot">
-    <div class="boot-mark"><i></i><i></i></div>
-    <strong>JUNTA</strong>
-    <span>Preparando as ofertas...</span>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="ambient ambient-a" aria-hidden="true"></div>
+  <div class="ambient ambient-b" aria-hidden="true"></div>
+
+  <header class="topbar" id="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="#inicio" aria-label="Junta - início">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i></span>
+        <span class="brand-word">JUNTA</span>
+      </a>
+      <nav class="desktop-nav" aria-label="Principal">
+        <a href="#ofertas">Ofertas</a>
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#empresas">Para vender</a>
+      </nav>
+      <button class="account-pill" id="accountButton" type="button">
+        <span class="account-dot"></span>
+        <span id="accountLabel">Entrar</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero shell" id="inicio">
+      <div class="hero-copy reveal">
+        <div class="eyebrow"><span class="live-dot"></span> COMPRA COLETIVA, PREÇO MELHOR</div>
+        <h1>Compre junto.<br><span>Pague menos.</span></h1>
+        <p class="hero-lead">Você compra uma unidade. O Junta reúne muita gente querendo a mesma coisa e transforma todo mundo em um pedido grande.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary magnetic" href="#ofertas">Ver ofertas <span>↘</span></a>
+          <button class="btn btn-ghost" type="button" data-scroll="#como-funciona">Entender em 30 segundos <span>▶</span></button>
+        </div>
+        <div class="trust-row">
+          <span><b>✓</b> sem cartão salvo</span>
+          <span><b>✓</b> retirada simples</span>
+          <span><b>✓</b> comércio local</span>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal delay-1" id="heroVisual">
+        <div class="hero-orb"></div>
+        <img src="/assets/collective.png" alt="Pessoas se juntando para comprar mais barato" class="hero-art" />
+        <div class="float-card fc-price glass-card">
+          <span>Preço Junta</span>
+          <strong>até 42% menos</strong>
+        </div>
+        <div class="float-card fc-people glass-card">
+          <div class="avatars"><i></i><i></i><i></i><i>+</i></div>
+          <div><strong id="heroQueue">175</strong><span>na fila agora</span></div>
+        </div>
+        <div class="float-card fc-friday glass-card"><span>🔥</span><div><b>Sexta do Junta</b><small>18h • toda semana</small></div></div>
+      </div>
+    </section>
+
+    <section class="friday-wrap" id="ofertas">
+      <div class="shell">
+        <div class="friday-head reveal">
+          <div>
+            <span class="section-kicker">🔥 SEXTA DO JUNTA</span>
+            <h2>Preço de atacado.<br>Sem comprar no atacado.</h2>
+          </div>
+          <div class="countdown-card glass-card">
+            <small>PRÓXIMA ABERTURA</small>
+            <strong id="countdown">-- : -- : --</strong>
+            <span id="countdownLabel">sexta, 18h</span>
+          </div>
+        </div>
+
+        <div class="category-strip reveal delay-1" id="categoryStrip">
+          <button class="category active" data-category="todos"><span class="cat-mini">✦</span><b>Tudo</b></button>
+          <button class="category" data-category="comida"><span class="cat-mini cat-food">🍔</span><b>Comida</b></button>
+          <button class="category" data-category="mercado"><span class="cat-mini cat-market">🛒</span><b>Mercado</b></button>
+          <button class="category" data-category="moda"><span class="cat-mini cat-fashion">◒</span><b>Moda</b></button>
+          <button class="category" data-category="beleza"><span class="cat-mini">✦</span><b>Beleza</b></button>
+        </div>
+
+        <div class="offers-status" id="offersStatus"><span class="spinner"></span> Buscando as melhores ofertas...</div>
+        <div class="offers-grid" id="offersGrid" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="manifesto shell reveal">
+      <div class="manifesto-card">
+        <img src="/assets/unlock.png" alt="Oferta liberada" />
+        <div>
+          <span class="section-kicker">O JEITO JUNTA</span>
+          <h2>O desconto vem do <em>volume</em>, não de cupom.</h2>
+          <p>A loja escolhe quanto precisa vender para liberar um preço melhor. A gente reúne a demanda, cria a fila e abre a compra quando faz sentido.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="how" id="como-funciona">
+      <div class="shell">
+        <div class="section-title reveal">
+          <span class="section-kicker">COMO FUNCIONA</span>
+          <h2>Quatro passos.<br>Zero complicação.</h2>
+          <p>Você demonstra interesse sem pagar. Quando a oferta abre, quem confirmar primeiro garante.</p>
+        </div>
+        <div class="steps-grid">
+          <article class="step-card reveal">
+            <div class="step-num">01</div>
+            <img src="/assets/queue.png" alt="Entrar na fila" />
+            <h3>Entre na fila</h3>
+            <p>Mostre interesse sem tirar dinheiro da conta. Isso ajuda a oferta ganhar força.</p>
+            <span class="step-pill">Sem cobrança</span>
+          </article>
+          <article class="step-card reveal delay-1">
+            <div class="step-num">02</div>
+            <img src="/assets/unlock.png" alt="Oferta liberada" />
+            <h3>Receba o aviso</h3>
+            <p>Quando existe gente suficiente, a compra abre e todo mundo da fila é avisado.</p>
+            <span class="step-pill">Liberação ao vivo</span>
+          </article>
+          <article class="step-card reveal delay-2">
+            <div class="step-num">03</div>
+            <div class="step-symbol secure-symbol" aria-hidden="true"><span>✓</span></div>
+            <h3>Pague no parceiro</h3>
+            <p>Pix ou cartão no ambiente do parceiro de pagamento. O Junta não guarda os dados do seu cartão.</p>
+            <span class="step-pill">Pagamento protegido</span>
+          </article>
+          <article class="step-card reveal delay-3">
+            <div class="step-num">04</div>
+            <div class="step-symbol voucher-symbol" aria-hidden="true"><span>⌁</span></div>
+            <h3>Retire com voucher</h3>
+            <p>Pagamento confirmado, voucher liberado. Mostre o QR no estabelecimento e pronto.</p>
+            <span class="step-pill">Retirada simples</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="safety shell reveal">
+      <div class="safety-card">
+        <div class="safety-icon"><div class="shield-mark" aria-hidden="true">✓</div></div>
+        <div class="safety-copy">
+          <span class="section-kicker">PAGAMENTO SEM SUSTO</span>
+          <h2>Seu cartão não mora aqui.</h2>
+          <p>O Junta organiza fila, preço e voucher. Dados sensíveis de pagamento ficam com o parceiro especializado.</p>
+        </div>
+        <div class="safety-points">
+          <div><span>01</span><b>Checkout externo</b><small>Você paga no parceiro</small></div>
+          <div><span>02</span><b>Confirmação automática</b><small>O Junta recebe só o status</small></div>
+          <div><span>03</span><b>Voucher único</b><small>Uso validado na retirada</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="seller" id="empresas">
+      <div class="shell seller-grid">
+        <div class="seller-copy reveal">
+          <span class="section-kicker">PARA QUEM VENDE</span>
+          <h2>Troque desconto por <span>volume de verdade.</span></h2>
+          <p>Você escolhe produto, preço, mínimo e quantidade. O Junta organiza a fila e mostra interesse antes da venda.</p>
+          <button class="btn btn-dark" id="sellerCTA" type="button">Quero colocar minha empresa <span>→</span></button>
+          <div class="seller-proof">
+            <div><strong>184</strong><span>pessoas na fila</span></div>
+            <div><strong>+26</strong><span>entraram hoje</span></div>
+            <div><strong>R$ 3.420</strong><span>potencial da rodada</span></div>
+          </div>
+        </div>
+        <div class="seller-visual reveal delay-1">
+          <div class="seller-glow"></div>
+          <img src="/assets/queue.png" alt="Demanda coletiva chegando ao painel da empresa" />
+          <div class="seller-live glass-card"><span></span> interesse chegando ao vivo</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="faq shell">
+      <div class="section-title compact reveal"><span class="section-kicker">SEM LETRA MIÚDA</span><h2>Dúvidas rápidas.</h2></div>
+      <div class="faq-list reveal delay-1">
+        <details><summary>Entrar na fila cobra alguma coisa?<span>+</span></summary><p>Não. A fila registra interesse. O pagamento só aparece quando a rodada é liberada.</p></details>
+        <details><summary>E se nem todo mundo pagar?<span>+</span></summary><p>A loja define um mínimo econômico e a fila trabalha com uma margem maior. Se o mínimo de pagamentos for atingido, quem pagou recebe normalmente.</p></details>
+        <details><summary>O Junta guarda meu cartão?<span>+</span></summary><p>Não. A proposta é usar checkout de um parceiro de pagamentos. O Junta recebe a confirmação da compra, não o número do cartão ou CVV.</p></details>
+        <details><summary>Como a empresa publica uma oferta?<span>+</span></summary><p>No painel da empresa: produto, foto, preço, meta, quantidade e data. A oferta pode passar por aprovação antes de ir ao ar.</p></details>
+      </div>
+    </section>
   </main>
-  <script type="module" src="/bootstrap.js"></script>
+
+  <footer>
+    <div class="shell footer-inner">
+      <div class="footer-brand"><span class="brand-mark"><i></i><i></i></span><b>JUNTA</b><p>Juntando pessoas para transformar compra pequena em preço grande.</p></div>
+      <div class="footer-note"><span>Brasil • V1</span><span>Pagamentos: integração segura em preparação</span></div>
+    </div>
+  </footer>
+
+  <nav class="mobile-dock" aria-label="Navegação móvel">
+    <a href="#inicio" class="active"><span>⌂</span><small>Início</small></a>
+    <a href="#ofertas"><span>◫</span><small>Ofertas</small></a>
+    <button id="mobileSeller" type="button"><span>↗</span><small>Vender</small></button>
+    <button id="mobileAccount" type="button"><span>◉</span><small>Conta</small></button>
+  </nav>
+
+  <div class="modal" id="offerModal" aria-hidden="true">
+    <div class="modal-scrim" data-close="offerModal"></div>
+    <section class="sheet offer-sheet" role="dialog" aria-modal="true" aria-label="Detalhes da oferta">
+      <button class="sheet-close" data-close="offerModal" aria-label="Fechar">×</button>
+      <div id="offerModalContent"></div>
+    </section>
+  </div>
+
+  <div class="modal" id="accountModal" aria-hidden="true">
+    <div class="modal-scrim" data-close="accountModal"></div>
+    <section class="sheet account-sheet" role="dialog" aria-modal="true" aria-label="Conta">
+      <button class="sheet-close" data-close="accountModal" aria-label="Fechar">×</button>
+      <div id="accountContent"></div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script type="module" src="/app.js?v=6"></script>
 </body>
 </html>
