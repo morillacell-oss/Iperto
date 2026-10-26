@@ -1,0 +1,1 @@
+.category-strip{scroll-snap-type:x proximity;padding-bottom:12px}.category{scroll-snap-align:start;white-space:nowrap}.seller-form select{width:100%;height:48px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);padding:0 13px;font:inherit;outline:none}.seller-form select:focus{border-color:rgba(255,64,56,.5);box-shadow:0 0 0 3px rgba(255,64,56,.08)}
