@@ -4,7 +4,7 @@
   const $=(s,r=document)=>r.querySelector(s);
   const $$=(s,r=document)=>[...r.querySelectorAll(s)];
   let role='guest', profile=null, business=null, session=null;
-  let enforcing=false;
+  let enforcing=false, paintingAvatar=false;
 
   document.documentElement.classList.add('junta-role-checking');
 
@@ -15,11 +15,20 @@
     return (parts[0][0]+parts[parts.length-1][0]).toUpperCase();
   }
 
+  function avatarIsCorrect(){
+    const wrap=$('.avatar-mini'); if(!wrap)return true;
+    if(role==='seller'&&business?.logo_url){return wrap.querySelector('img')?.src===business.logo_url}
+    if(role==='buyer'){return wrap.textContent.trim()===initials(profile?.display_name||session?.user?.email?.split('@')[0]||'J')}
+    if(role==='seller'){return wrap.textContent.trim()===initials(business?.name||profile?.display_name||'E')}
+    return wrap.textContent.trim()==='J';
+  }
+
   function avatar(){
     const wrap=$('.avatar-mini');
     const pill=$('.account-pill');
     const label=$('.account-label');
-    if(!wrap) return;
+    if(!wrap||paintingAvatar||avatarIsCorrect()) return;
+    paintingAvatar=true;
     wrap.classList.remove('has-business-logo');
     wrap.replaceChildren();
     if(role==='seller' && business?.logo_url){
@@ -43,6 +52,7 @@
       wrap.textContent='J';
       if(label) label.textContent='Entrar';
     }
+    requestAnimationFrame(()=>{paintingAvatar=false});
   }
 
   function setActiveView(view){
@@ -85,7 +95,7 @@
       setActiveView('seller');
       requestAnimationFrame(()=>{enforcing=false});
     }
-    avatar();
+    if(!avatarIsCorrect())avatar();
   }
 
   function installGuard(){
@@ -102,8 +112,13 @@
         e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openSeller(sellerSectionFromNav(view));
       }
     },true);
-    const mo=new MutationObserver(()=>enforceSeller());
-    const app=$('#app');if(app)mo.observe(app,{subtree:true,attributes:true,attributeFilter:['class']});
+    const appObserver=new MutationObserver(()=>enforceSeller());
+    const app=$('#app');if(app)appObserver.observe(app,{subtree:true,attributes:true,attributeFilter:['class']});
+    const topbar=$('.topbar');
+    if(topbar){
+      const headerObserver=new MutationObserver(()=>{if(!avatarIsCorrect())setTimeout(avatar,0)});
+      headerObserver.observe(topbar,{subtree:true,childList:true,characterData:true});
+    }
   }
 
   async function boot(){
@@ -130,7 +145,11 @@
         setActiveView('seller');
         installGuard();
         openSeller('dashboard');
+      } else if(role==='buyer') {
+        const topbar=$('.topbar');
+        if(topbar){const headerObserver=new MutationObserver(()=>{if(!avatarIsCorrect())setTimeout(avatar,0)});headerObserver.observe(topbar,{subtree:true,childList:true,characterData:true})}
       }
+      setTimeout(avatar,250);setTimeout(avatar,900);setTimeout(avatar,1800);
     }catch(err){
       console.error('Junta role gate',err);
     }finally{
