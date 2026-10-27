@@ -28,12 +28,14 @@
   function openAccount(){
     active('account');
     document.dispatchEvent(new Event('junta:v62-open-account'));
-    setTimeout(()=>window.JuntaRoleGate?.avatar?.(),0);
+    setTimeout(refreshChrome,0);
   }
   function seller(section){
     unlockScroll();
     if(window.JuntaSellerApp?.show) window.JuntaSellerApp.show(section);
     else window.JuntaRoleGate?.openSeller?.(section);
+    setTimeout(refreshChrome,120);
+    setTimeout(refreshChrome,700);
   }
   function buyerHome(){
     active('account');
@@ -90,10 +92,29 @@
     $$('.nav-item,.account-pill,.brand,#searchTrigger,.v70-tabs button,.v70-offer,.v70-group-card,button').forEach(el=>{el.style.touchAction='manipulation'});
   }
   function avatar(){ window.JuntaRoleGate?.avatar?.(); }
+  function syncSellerLogoFromPage(){
+    if(readRole()!=='seller') return;
+    const source=$('.v70-store-logo img');
+    const wrap=$('.avatar-mini');
+    if(!source?.src||!wrap) return;
+    const current=wrap.querySelector('img');
+    if(current?.src===source.src) return;
+    const img=document.createElement('img');
+    img.src=source.src;
+    img.alt=source.alt||'Logo da empresa';
+    img.loading='eager';
+    img.decoding='async';
+    wrap.replaceChildren(img);
+    wrap.classList.add('has-business-logo');
+    const label=$('.account-label');
+    const name=$('.v70-store h1')?.textContent?.trim();
+    if(label&&name) label.textContent=name;
+  }
   function refreshChrome(){
     unlockScroll();
     readRole();
     avatar();
+    syncSellerLogoFromPage();
     improveTouch();
   }
 
@@ -107,18 +128,21 @@
   document.addEventListener('junta:v71-role-ready',()=>{
     refreshChrome();
     setTimeout(refreshChrome,120);
-    setTimeout(refreshChrome,500);
+    setTimeout(refreshChrome,600);
+    setTimeout(refreshChrome,1600);
     if(role==='seller')seller('dashboard');
   });
   document.addEventListener('DOMContentLoaded',()=>{
     refreshChrome();
     setTimeout(refreshChrome,150);
+    setTimeout(refreshChrome,700);
+    setTimeout(refreshChrome,1800);
   });
-  window.addEventListener('pageshow',()=>{refreshChrome();});
+  window.addEventListener('pageshow',()=>{refreshChrome();setTimeout(refreshChrome,300);});
 
-  // No MutationObserver here: an earlier version repainted the avatar in response
-  // to its own DOM mutation, causing continuous work on mobile browsers.
+  // Intentionally no MutationObserver: an earlier version reacted to its own
+  // avatar DOM writes and could keep the mobile main thread busy continuously.
   unlockScroll();
 
-  window.JuntaRuntime={routeNav,routeBrand,routeSearch,openAccount,unlockScroll,get role(){return role}};
+  window.JuntaRuntime={routeNav,routeBrand,routeSearch,openAccount,unlockScroll,refreshChrome,get role(){return role}};
 })();
