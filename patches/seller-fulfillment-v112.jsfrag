@@ -1,0 +1,30 @@
+  function sellerGroupsView(rows){
+    const active=rows.filter(o=>['pending','scheduled','open'].includes(o.status));
+    const runs=(state.sellerTierRuns||[]).filter(r=>r.status==='achieved');
+    const whatsappReady=!!normalizeWhatsapp(state.business?.whatsapp);
+    return `<section class="j-panel"><span class="j-kicker">MEUS GRUPOS</span><h2>Grupos em andamento</h2>${!whatsappReady?`<div class="j-seller-whatsapp-warning"><div><b>Cadastre o WhatsApp de pedidos</b><span>Quando uma meta fechar, os compradores usam esse número para enviar o pedido já organizado.</span></div><button class="j-btn primary" data-edit-whatsapp>Cadastrar WhatsApp</button></div>`:''}${active.length?`<div class="j-list">${active.map(sellerOfferRow).join('')}</div>`:`<div class="j-empty"><h3>Nenhum grupo em andamento.</h3></div>`}</section>${runs.length?`<section class="j-panel j-completed-groups"><div class="j-section-head"><div><span class="j-kicker">METAS ATINGIDAS</span><h2>Pedidos liberados</h2><p>Acompanhe quem já finalizou e o andamento de cada pedido.</p></div></div><div class="j-achieved-run-list">${runs.map(r=>sellerRunCard(r,rows)).join('')}</div></section>`:''}`;
+  }
+
+  function sellerRunCard(run,rows){
+    const o=rows.find(x=>x.id===run.offer_id);if(!o)return '';
+    const orders=(state.sellerOrders||[]).filter(x=>x.tier_run_id===run.id&&x.status!=='cancelled');
+    const done=orders.length,pending=Math.max(0,Number(run.target_people)-done);
+    return `<article class="j-achieved-run-card"><div class="j-achieved-run-head"><div><span>🎉 META ATINGIDA</span><h3>${esc(o.title)}</h3><p>${run.target_people} pessoas · ${money(run.unit_price)}</p></div><div class="j-achieved-count"><strong>${done}/${run.target_people}</strong><small>pedidos enviados</small></div></div><div class="j-run-progress"><i style="width:${pct(done,run.target_people)}%"></i></div><div class="j-run-progress-meta"><span>${pending?`${pending} aguardando finalização`:'Todos finalizaram'}</span><span>${new Date(run.achieved_at).toLocaleDateString('pt-BR')}</span></div>${orders.length?`<div class="j-order-list">${orders.map(sellerOrderCard).join('')}</div>`:`<div class="j-empty compact"><h3>Aguardando compradores.</h3><p>Assim que finalizarem, os pedidos aparecem aqui.</p></div>`}</article>`;
+  }
+
+  function sellerOrderCard(order){
+    const next=({submitted:'confirmed',whatsapp_opened:'confirmed',confirmed:'preparing',preparing:'ready',ready:'delivered'})[order.status]||'';
+    const nextLabel=({confirmed:'Confirmar pedido',preparing:'Iniciar preparo',ready:'Marcar como pronto',delivered:'Marcar entregue'})[next]||'';
+    const address=order.fulfillment_method==='delivery'?orderAddressText(order):'Retirada no estabelecimento';
+    return `<div class="j-seller-order"><div class="j-seller-order-top"><div><span>${esc(order.order_code)}</span><strong>${esc(order.recipient_name)}</strong></div><b class="j-order-status status-${esc(order.status)}">${esc(orderStatusLabel(order.status))}</b></div><div class="j-seller-order-data"><p><small>RECEBIMENTO</small><strong>${esc(address)}</strong></p><p><small>PAGAMENTO</small><strong>${esc(paymentText(order))}</strong></p>${order.extras?`<p><small>ADICIONAIS / OBSERVAÇÕES</small><strong>${esc(order.extras)}</strong></p>`:''}</div>${next?`<button class="j-btn secondary" data-order-next="${order.id}" data-order-status="${next}">${nextLabel}</button>`:''}</div>`;
+  }
+
+  async function updateSellerOrderStatus(id,status){
+    try{
+      const {data,error}=await db.from('group_orders').update({status}).eq('id',id).select('*').single();
+      if(error)throw error;
+      state.sellerOrders=(state.sellerOrders||[]).map(x=>x.id===id?data:x);
+      toast(`Pedido: ${orderStatusLabel(status)}.`);
+      paintSeller('groups');
+    }catch(err){toast(err.message||'Não foi possível atualizar o pedido.');}
+  }
