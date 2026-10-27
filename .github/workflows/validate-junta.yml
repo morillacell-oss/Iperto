@@ -1,0 +1,43 @@
+name: Validate Junta
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check site/app-v100.js
+          node --check build.mjs
+
+      - name: Build clean SPA
+        run: node build.mjs
+
+      - name: Verify required V100 assets
+        run: |
+          test -f dist/index.html
+          test -f dist/app-v100.js
+          test -f dist/app-v100.css
+          grep -q '/app-v100.js?v=100' dist/index.html
+          grep -q '/app-v100.css?v=100' dist/index.html
+
+      - name: Prevent legacy runtime regression
+        run: |
+          ! grep -Eq 'app\.js\?v=30|product-v40\.js|product-v42\.js|landing-v50\.js|experience-v51\.js|runtime-v61\.js|account-v62\.js|seller-app-v70\.js|role-gate-v71\.js|runtime-v80\.js|seller-app-v84\.js' dist/index.html
