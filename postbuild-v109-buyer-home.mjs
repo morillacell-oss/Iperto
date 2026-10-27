@@ -7,8 +7,8 @@ const paintBuyer=readFileSync('patches/paintBuyer-v109.jsfrag','utf8').trimEnd()
 
 function replaceChecked(label,regex,replacement){
   const before=app;
-  app=app.replace(regex,replacement);
-  if(app===before)throw new Error(`V109 patch failed: ${label}`);
+  app=app.replace(regex,()=>replacement);
+  if(app===before)throw new Error(`V110 patch failed: ${label}`);
 }
 
 replaceChecked(
@@ -23,6 +23,10 @@ replaceChecked(
   `${paintBuyer}\n  function flashCard`
 );
 
+if(!app.includes("$$('[data-buyer-offer]',root).forEach")){
+  throw new Error('V110 validation failed: buyer offer selector must remain querySelectorAll');
+}
+
 new Function(app);
 writeFileSync(appPath,app);
 
@@ -33,8 +37,8 @@ writeFileSync(cssPath,css);
 
 const indexPath='dist/index.html';
 let index=readFileSync(indexPath,'utf8')
-  .replace(/app-v100\.css\?v=\d+/g,'app-v100.css?v=109')
-  .replace(/app-v100\.js\?v=\d+/g,'app-v100.js?v=109');
+  .replace(/app-v100\.css\?v=\d+/g,'app-v100.css?v=110')
+  .replace(/app-v100\.js\?v=\d+/g,'app-v100.js?v=110');
 writeFileSync(indexPath,index);
 
-console.log('Junta V109 buyer local discovery experience ready');
+console.log('Junta V110 buyer selector build fixed and validated');
