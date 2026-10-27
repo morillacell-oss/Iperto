@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node build.mjs",
+  "buildCommand": "node build.mjs && node -e 'const fs=require(\"fs\");const q=String.fromCharCode(39);let p=\"dist/app-v100.js\",s=fs.readFileSync(p,\"utf8\");s=s.replace(/\\$\\(\\x27\\[data-cut\\]\\x27,overlay\\)\\.forEach/g,()=>\"$$(\"+q+\"[data-cut]\"+q+\",overlay).forEach\").replace(/\\$\\(\\x27\\[data-buyer-offer\\]\\x27,root\\)\\.forEach/g,()=>\"$$(\"+q+\"[data-buyer-offer]\"+q+\",root).forEach\");new Function(s);fs.writeFileSync(p,s);let i=\"dist/index.html\",h=fs.readFileSync(i,\"utf8\").replace(/v=103/g,\"v=104\");fs.writeFileSync(i,h);'",
   "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": false,
