@@ -6,7 +6,21 @@
     role=window.JuntaRoleGate?.role||window.__JUNTA_ROLE||document.body?.dataset.juntaRole||'guest';
     return role;
   }
+  function unlockScroll(){
+    document.documentElement.classList.remove('junta-role-checking');
+    document.documentElement.style.removeProperty('overflow');
+    document.documentElement.style.removeProperty('height');
+    if(document.body){
+      document.body.style.removeProperty('overflow');
+      document.body.style.removeProperty('overflow-y');
+      document.body.style.removeProperty('height');
+      document.body.style.removeProperty('position');
+      document.body.style.removeProperty('top');
+      document.body.style.removeProperty('touch-action');
+    }
+  }
   function active(view){
+    unlockScroll();
     $$('.view').forEach(v=>v.classList.toggle('active',v.dataset.view===view));
     $$('.bottom-nav [data-nav]').forEach(n=>n.classList.toggle('active',n.dataset.nav===view));
     window.scrollTo({top:0,behavior:'auto'});
@@ -17,6 +31,7 @@
     setTimeout(()=>window.JuntaRoleGate?.avatar?.(),0);
   }
   function seller(section){
+    unlockScroll();
     if(window.JuntaSellerApp?.show) window.JuntaSellerApp.show(section);
     else window.JuntaRoleGate?.openSeller?.(section);
   }
@@ -75,6 +90,12 @@
     $$('.nav-item,.account-pill,.brand,#searchTrigger,.v70-tabs button,.v70-offer,.v70-group-card,button').forEach(el=>{el.style.touchAction='manipulation'});
   }
   function avatar(){ window.JuntaRoleGate?.avatar?.(); }
+  function refreshChrome(){
+    unlockScroll();
+    readRole();
+    avatar();
+    improveTouch();
+  }
 
   window.addEventListener('click',capture,true);
   window.addEventListener('pointerup',e=>{
@@ -83,17 +104,21 @@
     setTimeout(()=>el?.classList.remove('junta-tapped'),110);
   },{passive:true});
 
-  document.addEventListener('junta:v71-role-ready',()=>{readRole();avatar();improveTouch();if(role==='seller')seller('dashboard')});
-  document.addEventListener('DOMContentLoaded',()=>{readRole();avatar();improveTouch()});
-
-  let avatarQueued=false;
-  const mo=new MutationObserver(()=>{
-    if(avatarQueued) return;
-    avatarQueued=true;
-    requestAnimationFrame(()=>{avatarQueued=false;avatar();});
+  document.addEventListener('junta:v71-role-ready',()=>{
+    refreshChrome();
+    setTimeout(refreshChrome,120);
+    setTimeout(refreshChrome,500);
+    if(role==='seller')seller('dashboard');
   });
-  const startObs=()=>{const h=document.querySelector('.topbar');if(h)mo.observe(h,{subtree:true,childList:true,characterData:true})};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startObs,{once:true});else startObs();
+  document.addEventListener('DOMContentLoaded',()=>{
+    refreshChrome();
+    setTimeout(refreshChrome,150);
+  });
+  window.addEventListener('pageshow',()=>{refreshChrome();});
 
-  window.JuntaRuntime={routeNav,routeBrand,routeSearch,openAccount,get role(){return role}};
+  // No MutationObserver here: an earlier version repainted the avatar in response
+  // to its own DOM mutation, causing continuous work on mobile browsers.
+  unlockScroll();
+
+  window.JuntaRuntime={routeNav,routeBrand,routeSearch,openAccount,unlockScroll,get role(){return role}};
 })();
