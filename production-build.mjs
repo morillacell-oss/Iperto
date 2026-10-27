@@ -11,6 +11,7 @@ const steps=[
   'postbuild-v113-hardening.mjs',
   'postbuild-v114-review.mjs',
   'postbuild-v115-validation.mjs',
+  'postbuild-v116-premium.mjs',
 ];
 for(const step of steps){
   console.log(`\n▶ ${step}`);
