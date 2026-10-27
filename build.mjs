@@ -18,6 +18,16 @@ if (!html.includes('experience-v51.css')) html = html.replace('</head>', '  <lin
 if (!html.includes('product-v60.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/product-v60.css?v=60">\n</head>');
 if (!html.includes('account-v62.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/account-v62.css?v=62">\n</head>');
 if (!html.includes('seller-app-v70.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/seller-app-v70.css?v=70">\n</head>');
+if (!html.includes('role-gate-v71.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/role-gate-v71.css?v=71">\n</head>');
+
+// Critical role gate: runs immediately after Supabase and BEFORE the legacy app scripts.
+if (!html.includes('role-gate-v71.js')) {
+  html = html.replace(
+    '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>',
+    '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>\n  <script src="/role-gate-v71.js?v=71"></script>'
+  );
+}
+
 if (!html.includes('categories-ui.js')) html = html.replace('</body>', '  <script src="/categories-ui.js?v=30"></script>\n</body>');
 if (!html.includes('polish-v31.js')) html = html.replace('</body>', '  <script src="/polish-v31.js?v=31"></script>\n</body>');
 if (!html.includes('product-v40.js')) html = html.replace('</body>', '  <script src="/product-v40.js?v=40"></script>\n</body>');
@@ -34,4 +44,4 @@ if (!html.includes('account-v62.js')) html = html.replace('</body>', '  <script 
 if (!html.includes('seller-app-v70.js')) html = html.replace('</body>', '  <script src="/seller-app-v70.js?v=70"></script>\n</body>');
 writeFileSync('dist/index.html', html);
 
-console.log('Junta V70 role-aware seller operating app ready');
+console.log('Junta V71 early role gate, seller isolation and smart avatars ready');
