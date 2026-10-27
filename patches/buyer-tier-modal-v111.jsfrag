@@ -1,0 +1,94 @@
+  function openOfferModal(o,allowJoin){
+    const membership=state.buyerWaitlist.find(x=>x.offer_id===o.id);
+    const cancelled=o.status==='cancelled'||membership?.status==='cancelled';
+    const s=statsOf(o),w=Number(s.waitlist_count||0),target=Number(o.queue_target||25),ts=tiersOf(o),b=businessOf(o),joined=membership?.status!=='cancelled'&&!!membership;
+    let selectedTarget=Number(membership?.target_people||new URLSearchParams(location.search).get('tier')||0);
+    const tierRows=ts.map(t=>{const n=Number(t.people_count),count=tierMemberCount(o,n),remaining=Math.max(0,n-count),selected=n===selectedTarget;return `<button type="button" class="j-tier-choice ${selected?'selected':''}" data-tier-choice="${n}"><span class="j-tier-radio"><i></i></span><div class="j-tier-choice-main"><strong>${n} pessoas</strong><small>${remaining===0?'Meta completa':remaining===1?'Falta 1 pessoa':`Faltam ${remaining} pessoas`}</small></div><div class="j-tier-choice-price"><strong>${money(t.unit_price)}</strong><small>${count} já escolheram</small></div></button>`}).join('');
+    openOverlay(`<div class="j-modal j-buyer-offer-modal"><div class="j-modal-head"><div><span class="j-kicker">${esc(b.name||'JUNTA')}</span><h2>${esc(o.title)}</h2></div><button class="j-close" data-close>×</button></div>${o.image_url?`<img src="${esc(o.image_url)}" alt="${esc(o.title)}" class="j-offer-modal-img">`:''}${cancelled?`<div class="j-cancelled-modal"><span>GRUPO CANCELADO</span><strong>INCOMPLETO</strong><p>${esc(membership?.cancellation_reason||o.cancel_reason||'O vendedor encerrou este grupo antes da meta.')}</p><small>Você não precisa fazer nada. Este registro fica aqui apenas no seu histórico.</small></div>`:`<div class="j-modal-price-summary"><div><small>PREÇO NORMAL</small><s>${money(o.regular_price)}</s></div><div><small>MELHOR PREÇO</small><strong>${money(ts[ts.length-1]?.unit_price||o.junta_price)}</strong></div></div><div class="j-tier-picker-head"><span class="j-kicker">ESCOLHA SUA META</span><h3>Em qual faixa você quer entrar?</h3><p>Você conta uma única vez na oferta. Escolha o preço/meta que faz sentido para você.</p></div><div class="j-tier-choice-list">${tierRows}</div><div class="j-tier-selection" id="tierSelectionSummary"></div>${allowJoin?`<button class="j-btn primary" id="joinOfferBtn" style="width:100%;margin-top:14px">${joined?'Salvar minha meta':'Escolha uma meta acima'}</button>${joined&&membership?.target_people?`<button class="j-btn secondary j-share-btn" id="shareOfferBtn" style="width:100%;margin-top:10px">Compartilhar com amigos</button>`:''}`:`<button class="j-btn primary" id="authJoinBtn" style="width:100%;margin-top:16px">Entrar para participar</button>`}<p class="j-safe-copy center">Entrar no grupo não cobra nada agora.</p>`}</div>`);
+    if(cancelled)return;
+    const primary=$('#joinOfferBtn',overlay);
+    const refreshSelection=()=>{
+      $$('[data-tier-choice]',overlay).forEach(btn=>btn.classList.toggle('selected',Number(btn.dataset.tierChoice)===selectedTarget));
+      const tier=ts.find(t=>Number(t.people_count)===selectedTarget);
+      const summary=$('#tierSelectionSummary',overlay);
+      if(!tier){if(summary)summary.innerHTML='<span>Escolha uma meta acima para continuar.</span>';if(primary){primary.disabled=true;primary.textContent='Escolha uma meta acima';}return;}
+      const remaining=tierRemaining(o,selectedTarget);
+      if(summary)summary.innerHTML=`<span>Sua escolha</span><strong>${selectedTarget} pessoas · ${money(tier.unit_price)}</strong><small>${remaining===0?'Essa meta já está completa.':remaining===1?'Falta 1 pessoa para fechar essa meta.':`Faltam ${remaining} pessoas para fechar essa meta.`}</small>`;
+      if(primary){
+        const current=Number(membership?.target_people||0);
+        if(joined&&current===selectedTarget){primary.disabled=true;primary.textContent='Você já está nesta meta';}
+        else{primary.disabled=false;primary.textContent=joined?(current?'Mudar para esta meta':'Salvar minha meta'):`Entrar na meta de ${selectedTarget} pessoas`;}
+      }
+    };
+    $$('[data-tier-choice]',overlay).forEach(btn=>btn.onclick=()=>{selectedTarget=Number(btn.dataset.tierChoice);refreshSelection();});
+    refreshSelection();
+    if(allowJoin&&primary)primary.onclick=()=>saveBuyerTarget(o,selectedTarget,membership);
+    if(allowJoin&&$('#shareOfferBtn',overlay))$('#shareOfferBtn',overlay).onclick=()=>shareOffer(o,Number(membership.target_people));
+    if(!allowJoin)$('#authJoinBtn',overlay).onclick=()=>{localStorage.setItem('junta_pending_offer',o.id);if(selectedTarget)localStorage.setItem('junta_pending_tier',String(selectedTarget));closeOverlay();openAuth('buyer');};
+  }
+
+  async function saveBuyerTarget(o,target,membership){
+    if(![5,10,15,20,25].includes(Number(target))){toast('Escolha uma meta para continuar.');return;}
+    const btn=$('#joinOfferBtn',overlay);if(btn){btn.disabled=true;btn.textContent=membership?'Salvando...':'Entrando...';}
+    try{
+      track('join_intent',o);
+      if(membership&&membership.status!=='cancelled'){
+        const {error}=await db.from('offer_waitlist').update({target_people:Number(target)}).eq('offer_id',o.id).eq('user_id',state.session.user.id);
+        if(error)throw error;
+      }else{
+        const {error}=await db.from('offer_waitlist').insert({offer_id:o.id,user_id:state.session.user.id,target_people:Number(target)});
+        if(error)throw error;
+      }
+      state.buyerLoadedAt=0;
+      await loadBuyerData(true);
+      const fresh=state.buyerOffers.find(x=>x.id===o.id)||o;
+      showJoinedSuccess(fresh,Number(target));
+      renderBottomNav();
+    }catch(err){toast(err.message||'Não foi possível entrar nessa meta.');if(btn){btn.disabled=false;btn.textContent='Tentar novamente';}}
+  }
+
+  function showJoinedSuccess(o,target){
+    const b=businessOf(o),tier=tiersOf(o).find(t=>Number(t.people_count)===Number(target)),remaining=tierRemaining(o,target);
+    openOverlay(`<div class="j-modal j-joined-success"><div class="j-success-mark">✓</div><span class="j-kicker">VOCÊ ESTÁ NO GRUPO</span><h2>Meta escolhida: ${target} pessoas</h2><p>Você entrou na oferta <strong>${esc(o.title)}</strong>, da ${esc(b.name||'loja')}.</p><div class="j-success-target"><span>Seu preço nessa meta</span><strong>${money(tier?.unit_price||o.junta_price)}</strong><small>${remaining===0?'Meta completa!':remaining===1?'Falta só 1 pessoa para fechar.':`Restam ${remaining} pessoas para fechar essa meta.`}</small></div><div class="j-share-callout"><b>Chame a galera 👀</b><span>Compartilhe a oferta e ajude sua meta a fechar mais rápido.</span></div><button class="j-btn primary j-share-btn" id="successShareBtn">Compartilhar com amigos</button><button class="j-btn secondary" id="successDoneBtn">Ver meus grupos</button></div>`);
+    $('#successShareBtn',overlay).onclick=()=>shareOffer(o,target);
+    $('#successDoneBtn',overlay).onclick=()=>{closeOverlay();navigate('buyer-groups');};
+  }
+
+  async function createShareBanner(o,target){
+    const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1080;const ctx=canvas.getContext('2d');if(!ctx)return null;
+    const b=businessOf(o),tier=tiersOf(o).find(t=>Number(t.people_count)===Number(target)),remaining=tierRemaining(o,target);
+    ctx.fillStyle='#fffaf7';ctx.fillRect(0,0,1080,1080);
+    ctx.fillStyle='#ff3b36';ctx.fillRect(0,0,1080,150);
+    ctx.fillStyle='#fff';ctx.font='900 56px Arial';ctx.fillText('JUNTA',72,98);
+    ctx.font='700 28px Arial';ctx.fillText('COMPRA EM GRUPO',800,95);
+    if(o.image_url){try{const img=await new Promise((resolve,reject)=>{const el=new Image();el.crossOrigin='anonymous';el.onload=()=>resolve(el);el.onerror=reject;el.src=o.image_url;});const ratio=Math.max(1080/img.width,430/img.height),w=img.width*ratio,h=img.height*ratio;ctx.drawImage(img,(1080-w)/2,150+(430-h)/2,w,h);}catch(e){ctx.fillStyle='#ffe9e6';ctx.fillRect(0,150,1080,430);}}
+    else{ctx.fillStyle='#ffe9e6';ctx.fillRect(0,150,1080,430);}
+    ctx.fillStyle='#fffaf7';ctx.fillRect(0,580,1080,500);
+    ctx.fillStyle='#7b706c';ctx.font='700 30px Arial';ctx.fillText(String(b.name||'Oferta local').slice(0,32),72,650);
+    ctx.fillStyle='#171311';ctx.font='900 58px Arial';wrapCanvasText(ctx,String(o.title||'Oferta'),72,725,930,68,2);
+    ctx.fillStyle='#ff3b36';ctx.font='900 72px Arial';ctx.fillText(money(tier?.unit_price||o.junta_price),72,900);
+    ctx.fillStyle='#171311';ctx.font='800 34px Arial';ctx.fillText(`Meta: ${target} pessoas`,610,855);
+    ctx.fillStyle=remaining?'#6f6662':'#159b6f';ctx.font='700 30px Arial';ctx.fillText(remaining?`Faltam ${remaining} para fechar`:'Meta completa!',610,905);
+    ctx.fillStyle='#ffefed';ctx.fillRect(72,960,936,74);ctx.fillStyle='#ff3b36';ctx.font='800 28px Arial';ctx.fillText('ENTRE COMIGO NO JUNTA • PAGUE MENOS EM GRUPO',105,1007);
+    return await new Promise(resolve=>canvas.toBlob(resolve,'image/png',.92));
+  }
+
+  function wrapCanvasText(ctx,text,x,y,maxWidth,lineHeight,maxLines=3){
+    const words=String(text||'').split(/\s+/);let line='',lines=[];for(const word of words){const test=line?`${line} ${word}`:word;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word;if(lines.length>=maxLines)break;}else line=test;}if(lines.length<maxLines&&line)lines.push(line);lines.slice(0,maxLines).forEach((l,i)=>ctx.fillText(l,x,y+i*lineHeight));
+  }
+
+  async function shareOffer(o,target){
+    const b=businessOf(o),tier=tiersOf(o).find(t=>Number(t.people_count)===Number(target)),remaining=tierRemaining(o,target);
+    const url=`${location.origin}/?offer=${encodeURIComponent(o.id)}&tier=${Number(target)}`;
+    const message=`Olha essa oferta que achei no Junta 👀\n\n${o.title} na ${b.name||'loja'}\nMeta: ${target} pessoas • ${money(tier?.unit_price||o.junta_price)}\n${remaining===0?'A meta já está completa!':remaining===1?'Falta só 1 pessoa para fechar.':`Faltam ${remaining} pessoas para fechar.`}\n\nVem se juntar comigo:\n${url}`;
+    track('share',o);
+    try{
+      const blob=await createShareBanner(o,target);
+      if(blob&&navigator.share){
+        const file=new File([blob],`junta-${slugify(o.title)}-${target}.png`,{type:'image/png'});
+        if(!navigator.canShare||navigator.canShare({files:[file]})){await navigator.share({title:`${o.title} no Junta`,text:message,files:[file]});return;}
+      }
+      if(navigator.share){await navigator.share({title:`${o.title} no Junta`,text:message});return;}
+    }catch(err){if(err?.name==='AbortError')return;console.warn('share',err);}
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`,'_blank','noopener');
+  }
