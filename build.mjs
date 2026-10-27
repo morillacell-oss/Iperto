@@ -21,6 +21,7 @@ if (!html.includes('seller-app-v70.css')) html = html.replace('</head>', '  <lin
 if (!html.includes('role-gate-v71.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/role-gate-v71.css?v=85">\n</head>');
 if (!html.includes('runtime-v80.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/runtime-v80.css?v=85">\n</head>');
 if (!html.includes('seller-app-v84.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/seller-app-v84.css?v=85">\n</head>');
+if (!html.includes('seller-price-hotfix-v85.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/seller-price-hotfix-v85.css?v=85">\n</head>');
 
 if (!html.includes('role-gate-v71.js')) {
   html = html.replace(
@@ -46,4 +47,4 @@ if (!html.includes('seller-app-v84.js')) html = html.replace('</body>', '  <scri
 if (!html.includes('runtime-v80.js')) html = html.replace('</body>', '  <script src="/runtime-v80.js?v=85"></script>\n</body>');
 writeFileSync('dist/index.html', html);
 
-console.log('Junta V85 seller tabs nonblocking, timed data requests and clean runtime ready');
+console.log('Junta V85 seller tabs nonblocking, timed data requests, aligned price action and clean runtime ready');
