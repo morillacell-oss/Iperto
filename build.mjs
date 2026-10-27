@@ -15,6 +15,7 @@ if (!html.includes('product-v40.css')) html = html.replace('</head>', '  <link r
 if (!html.includes('categories-ui.js')) html = html.replace('</body>', '  <script src="/categories-ui.js?v=30"></script>\n</body>');
 if (!html.includes('polish-v31.js')) html = html.replace('</body>', '  <script src="/polish-v31.js?v=31"></script>\n</body>');
 if (!html.includes('product-v40.js')) html = html.replace('</body>', '  <script src="/product-v40.js?v=40"></script>\n</body>');
+if (!html.includes('copy-v41.js')) html = html.replace('</body>', '  <script src="/copy-v41.js?v=41"></script>\n</body>');
 writeFileSync('dist/index.html', html);
 
-console.log('Junta V40 role-based product build ready');
+console.log('Junta V41 role-based product build ready');
