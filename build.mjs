@@ -27,6 +27,7 @@ if (!html.includes('experience-v51.js')) html = html.replace('</body>', '  <scri
 if (!html.includes('fixes-v52.js')) html = html.replace('</body>', '  <script src="/fixes-v52.js?v=52"></script>\n</body>');
 if (!html.includes('buyer-region-v53.js')) html = html.replace('</body>', '  <script src="/buyer-region-v53.js?v=53"></script>\n</body>');
 if (!html.includes('product-v60.js')) html = html.replace('</body>', '  <script src="/product-v60.js?v=60"></script>\n</body>');
+if (!html.includes('runtime-v61.js')) html = html.replace('</body>', '  <script src="/runtime-v61.js?v=61"></script>\n</body>');
 writeFileSync('dist/index.html', html);
 
-console.log('Junta V60 premium buyer seller experience ready');
+console.log('Junta V61 premium buyer seller experience ready');
