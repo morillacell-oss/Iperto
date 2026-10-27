@@ -7,6 +7,7 @@ const steps=[
   'postbuild-v108-simplify-pricing.mjs',
   'postbuild-v109-buyer-home.mjs',
   'postbuild-v111-buyer-tiers.mjs',
+  'postbuild-v112-order-flow.mjs',
 ];
 for(const step of steps){
   console.log(`\n▶ ${step}`);
