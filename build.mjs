@@ -7,6 +7,7 @@ copyFileSync('favicon.svg', 'dist/favicon.svg');
 copyFileSync('manifest.webmanifest', 'dist/manifest.webmanifest');
 
 let html = readFileSync('dist/index.html', 'utf8');
+if (!html.includes('class="junta-role-checking"')) html = html.replace('<html lang="pt-BR">','<html lang="pt-BR" class="junta-role-checking">');
 if (!html.includes('assets-fix.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/assets-fix.css?v=2">\n</head>');
 if (!html.includes('categories-ui.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/categories-ui.css?v=30">\n</head>');
 if (!html.includes('identity-v30.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/identity-v30.css?v=30">\n</head>');
@@ -44,4 +45,4 @@ if (!html.includes('account-v62.js')) html = html.replace('</body>', '  <script 
 if (!html.includes('seller-app-v70.js')) html = html.replace('</body>', '  <script src="/seller-app-v70.js?v=70"></script>\n</body>');
 writeFileSync('dist/index.html', html);
 
-console.log('Junta V71 early role gate, seller isolation and smart avatars ready');
+console.log('Junta V71 hard role gate, seller isolation and smart avatars ready');
