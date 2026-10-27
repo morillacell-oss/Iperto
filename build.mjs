@@ -13,12 +13,14 @@ if (!html.includes('identity-v30.css')) html = html.replace('</head>', '  <link 
 if (!html.includes('identity-v31.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/identity-v31.css?v=31">\n</head>');
 if (!html.includes('product-v40.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/product-v40.css?v=40">\n</head>');
 if (!html.includes('product-v42.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/product-v42.css?v=42">\n</head>');
+if (!html.includes('landing-v50.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/landing-v50.css?v=50">\n</head>');
 if (!html.includes('categories-ui.js')) html = html.replace('</body>', '  <script src="/categories-ui.js?v=30"></script>\n</body>');
 if (!html.includes('polish-v31.js')) html = html.replace('</body>', '  <script src="/polish-v31.js?v=31"></script>\n</body>');
 if (!html.includes('product-v40.js')) html = html.replace('</body>', '  <script src="/product-v40.js?v=40"></script>\n</body>');
 if (!html.includes('copy-v41.js')) html = html.replace('</body>', '  <script src="/copy-v41.js?v=41"></script>\n</body>');
 if (!html.includes('product-v42.js')) html = html.replace('</body>', '  <script src="/product-v42.js?v=42"></script>\n</body>');
 if (!html.includes('master-v43.js')) html = html.replace('</body>', '  <script src="/master-v43.js?v=43"></script>\n</body>');
+if (!html.includes('landing-v50.js')) html = html.replace('</body>', '  <script src="/landing-v50.js?v=50"></script>\n</body>');
 writeFileSync('dist/index.html', html);
 
-console.log('Junta V43 real-only master analytics ready');
+console.log('Junta V50 approved public landing ready');
