@@ -1,5 +1,6 @@
   function tierRunFor(o,target){
-    return (state.buyerTierRuns||[]).find(r=>r.offer_id===o?.id&&Number(r.target_people)===Number(target)&&r.status==='achieved')||null;
+    const nested=Array.isArray(o?.offer_tier_runs)?o.offer_tier_runs:[];
+    return [...(state.buyerTierRuns||[]),...nested].find(r=>r.offer_id===o?.id&&Number(r.target_people)===Number(target)&&r.status==='achieved')||null;
   }
 
   function sellerTierRunsFor(offerId){
