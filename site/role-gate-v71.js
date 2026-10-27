@@ -1,164 +1,86 @@
 (() => {
   const SB_URL='https://rrulyvkarrwbopqeciyz.supabase.co';
   const SB_KEY='sb_publishable_PGO2G81WqwkxOEeQO-CI8A_YjXtUhiU';
+  const CACHE_KEY='junta_role_cache_v81';
   const $=(s,r=document)=>r.querySelector(s);
   const $$=(s,r=document)=>[...r.querySelectorAll(s)];
-  let role='guest', profile=null, business=null, session=null;
-  let enforcing=false, paintingAvatar=false;
-
-  document.documentElement.classList.add('junta-role-checking');
+  const db=window.__JUNTA_DB||(window.__JUNTA_DB=window.supabase?.createClient(SB_URL,SB_KEY));
+  let role='guest',profile=null,business=null,session=null,readySent=false,guardInstalled=false,booting=false;
 
   function initials(name=''){
     const parts=String(name).trim().split(/\s+/).filter(Boolean);
-    if(!parts.length) return 'J';
-    if(parts.length===1) return parts[0][0].toUpperCase();
-    return (parts[0][0]+parts[parts.length-1][0]).toUpperCase();
+    if(!parts.length)return 'J';
+    return parts.length===1?parts[0][0].toUpperCase():(parts[0][0]+parts[parts.length-1][0]).toUpperCase();
   }
-
-  function avatarIsCorrect(){
-    const wrap=$('.avatar-mini'); if(!wrap)return true;
-    if(role==='seller'&&business?.logo_url){return wrap.querySelector('img')?.src===business.logo_url}
-    if(role==='buyer'){return wrap.textContent.trim()===initials(profile?.display_name||session?.user?.email?.split('@')[0]||'J')}
-    if(role==='seller'){return wrap.textContent.trim()===initials(business?.name||profile?.display_name||'E')}
-    return wrap.textContent.trim()==='J';
-  }
-
+  function timeout(p,ms){return Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]);}
+  function readCache(){try{return JSON.parse(localStorage.getItem(CACHE_KEY)||'null')}catch{return null}}
+  function saveCache(){try{if(session?.user?.id)localStorage.setItem(CACHE_KEY,JSON.stringify({userId:session.user.id,email:session.user.email,role,profile,business,at:Date.now()}))}catch{}}
+  function clearCache(){try{localStorage.removeItem(CACHE_KEY)}catch{}}
+  function setBodyRole(){if(document.body)document.body.dataset.juntaRole=role;window.__JUNTA_ROLE=role;window.__JUNTA_PROFILE=profile;window.__JUNTA_BUSINESS=business;}
   function avatar(){
-    const wrap=$('.avatar-mini');
-    const pill=$('.account-pill');
-    const label=$('.account-label');
-    if(!wrap||paintingAvatar||avatarIsCorrect()) return;
-    paintingAvatar=true;
-    wrap.classList.remove('has-business-logo');
-    wrap.replaceChildren();
-    if(role==='seller' && business?.logo_url){
-      const img=document.createElement('img');
-      img.src=business.logo_url;
-      img.alt=business.name||'Logo da empresa';
-      img.loading='eager';
-      img.decoding='async';
-      wrap.appendChild(img);
-      wrap.classList.add('has-business-logo');
-      if(label) label.textContent=business.name||'Empresa';
-      if(pill) pill.setAttribute('aria-label',`Conta da empresa ${business.name||''}`.trim());
-    } else if(role==='buyer'){
-      wrap.textContent=initials(profile?.display_name||session?.user?.email?.split('@')[0]||'J');
-      if(label) label.textContent=profile?.display_name||'Conta';
-      if(pill) pill.setAttribute('aria-label','Minha conta');
-    } else if(role==='seller'){
-      wrap.textContent=initials(business?.name||profile?.display_name||'E');
-      if(label) label.textContent=business?.name||'Empresa';
-    } else {
-      wrap.textContent='J';
-      if(label) label.textContent='Entrar';
-    }
-    requestAnimationFrame(()=>{paintingAvatar=false});
+    const wrap=$('.avatar-mini'),label=$('.account-label'),pill=$('.account-pill');if(!wrap)return;
+    wrap.classList.remove('has-business-logo');wrap.replaceChildren();
+    if(role==='seller'&&business?.logo_url){const img=document.createElement('img');img.src=business.logo_url;img.alt=business.name||'Logo da empresa';wrap.appendChild(img);wrap.classList.add('has-business-logo');if(label)label.textContent=business.name||'Empresa';if(pill)pill.setAttribute('aria-label',`Conta da empresa ${business.name||''}`.trim());return;}
+    if(role==='buyer'){wrap.textContent=initials(profile?.display_name||session?.user?.email?.split('@')[0]||'J');if(label)label.textContent=profile?.display_name||'Conta';return;}
+    if(role==='seller'){wrap.textContent=initials(business?.name||profile?.display_name||'E');if(label)label.textContent=business?.name||'Empresa';return;}
+    wrap.textContent='J';if(label)label.textContent='Entrar';
   }
-
   function setActiveView(view){
     $$('.view').forEach(v=>v.classList.toggle('active',v.dataset.view===view));
     if(view==='seller'){
-      const home=$('.nav-item[data-nav="home"]'), offers=$('.nav-item[data-nav="offers"]'), seller=$('.nav-item[data-nav="seller"]');
-      if(home){home.style.display='flex';const s=home.querySelector('span');if(s)s.textContent='Painel'}
-      if(offers){offers.style.display='flex';const s=offers.querySelector('span');if(s)s.textContent='Ofertas'}
-      if(seller){seller.style.display='flex';const s=seller.querySelector('span');if(s)s.textContent='Grupos'}
-      const account=$('.nav-item[data-nav="account"]');if(account){const s=account.querySelector('span');if(s)s.textContent='Conta'}
+      const labels={home:'Painel',offers:'Ofertas',seller:'Grupos',account:'Conta'};
+      Object.entries(labels).forEach(([k,t])=>{const n=$(`.nav-item[data-nav="${k}"]`);if(n){n.style.display='flex';const s=n.querySelector('span');if(s)s.textContent=t}});
     }
   }
-
-  function sellerSectionFromNav(view){return view==='offers'?'offers':view==='seller'?'groups':'dashboard'}
-
-  function activateSellerSection(section='dashboard'){
-    let tries=0;
-    const tryActivate=()=>{
-      tries++;
-      if(window.JuntaSellerApp?.show){window.JuntaSellerApp.show(section);return true}
-      const tab=$(`[data-v70-section="${section}"]`);
-      if(tab){tab.click();return true}
-      if(tries<30){setTimeout(tryActivate,100);return false}
-      return false;
-    };
-    tryActivate();
+  function emitReady(){
+    if(readySent)return;readySent=true;
+    document.documentElement.classList.remove('junta-role-checking');document.documentElement.classList.add('junta-role-ready');
+    document.dispatchEvent(new CustomEvent('junta:v71-role-ready',{detail:{role}}));
   }
-
   function openSeller(section='dashboard'){
     setActiveView('seller');
+    if(window.JuntaSellerApp?.show){window.JuntaSellerApp.show(section);return;}
     document.dispatchEvent(new CustomEvent('junta:v71-seller-nav',{detail:{section}}));
-    activateSellerSection(section);
+    let tries=0;const t=setInterval(()=>{tries++;if(window.JuntaSellerApp?.show){clearInterval(t);window.JuntaSellerApp.show(section)}else if(tries>=12)clearInterval(t)},80);
   }
-
-  function enforceSeller(){
-    if(role!=='seller'||enforcing)return;
-    const active=$('.view.active')?.dataset.view;
-    if(active==='home'||active==='offers'){
-      enforcing=true;
-      setActiveView('seller');
-      requestAnimationFrame(()=>{enforcing=false});
-    }
-    if(!avatarIsCorrect())avatar();
-  }
-
   function installGuard(){
+    if(guardInstalled)return;guardInstalled=true;
     window.addEventListener('click',e=>{
       if(role!=='seller')return;
-      const brand=e.target?.closest?.('.brand');
-      const nav=e.target?.closest?.('[data-nav]');
-      if(brand){
-        e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openSeller('dashboard');return;
-      }
-      if(!nav)return;
-      const view=nav.dataset.nav;
-      if(['home','offers','seller'].includes(view)){
-        e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openSeller(sellerSectionFromNav(view));
-      }
+      const brand=e.target?.closest?.('.brand'),nav=e.target?.closest?.('[data-nav]');
+      if(!brand&&!nav)return;
+      const view=brand?'home':nav?.dataset.nav;
+      if(!['home','offers','seller'].includes(view))return;
+      e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+      openSeller(view==='offers'?'offers':view==='seller'?'groups':'dashboard');
     },true);
-    const appObserver=new MutationObserver(()=>enforceSeller());
-    const app=$('#app');if(app)appObserver.observe(app,{subtree:true,attributes:true,attributeFilter:['class']});
-    const topbar=$('.topbar');
-    if(topbar){
-      const headerObserver=new MutationObserver(()=>{if(!avatarIsCorrect())setTimeout(avatar,0)});
-      headerObserver.observe(topbar,{subtree:true,childList:true,characterData:true});
-    }
   }
-
-  async function boot(){
+  function applyCached(){
+    const c=readCache();if(!c||Date.now()-Number(c.at||0)>7*86400000)return;
+    role=c.role||'guest';profile=c.profile||null;business=c.business||null;setBodyRole();avatar();
+    if(role==='seller'&&business?.onboarding_complete){setActiveView('seller');installGuard();}
+  }
+  async function validate(){
+    if(!db)return;
     try{
-      if(!window.supabase) throw new Error('Supabase indisponível');
-      const db=window.supabase.createClient(SB_URL,SB_KEY);
-      const {data:{session:s}}=await db.auth.getSession();
-      session=s;
-      if(!session){role='guest';avatar();return}
-      const {data:p,error:pErr}=await db.from('profiles').select('*').eq('user_id',session.user.id).maybeSingle();
-      if(pErr)throw pErr;
-      profile=p;role=p?.role||'buyer';
+      const {data:{session:s}}=await timeout(db.auth.getSession(),1200);session=s;
+      if(!session){role='guest';profile=null;business=null;clearCache();setBodyRole();avatar();return;}
+      const cached=readCache();if(cached?.userId&&cached.userId!==session.user.id){clearCache();role='guest';profile=null;business=null;}
+      const {data:p,error:pErr}=await timeout(db.from('profiles').select('*').eq('user_id',session.user.id).maybeSingle(),1800);if(pErr)throw pErr;
+      profile=p;role=p?.role||'buyer';business=null;
       if(role==='seller'){
-        const {data:b,error:bErr}=await db.from('businesses').select('*').eq('owner_id',session.user.id).order('created_at',{ascending:true}).limit(1).maybeSingle();
-        if(bErr)throw bErr;
-        business=b;
+        const {data:b,error:bErr}=await timeout(db.from('businesses').select('*').eq('owner_id',session.user.id).order('created_at',{ascending:true}).limit(1).maybeSingle(),1800);if(bErr)throw bErr;business=b;
       }
-      window.__JUNTA_ROLE=role;
-      window.__JUNTA_PROFILE=profile;
-      window.__JUNTA_BUSINESS=business;
-      document.body?.setAttribute('data-junta-role',role);
-      avatar();
-      if(role==='seller'&&business?.onboarding_complete){
-        setActiveView('seller');
-        installGuard();
-        openSeller('dashboard');
-      } else if(role==='buyer') {
-        const topbar=$('.topbar');
-        if(topbar){const headerObserver=new MutationObserver(()=>{if(!avatarIsCorrect())setTimeout(avatar,0)});headerObserver.observe(topbar,{subtree:true,childList:true,characterData:true})}
-      }
-      setTimeout(avatar,250);setTimeout(avatar,900);setTimeout(avatar,1800);
-    }catch(err){
-      console.error('Junta role gate',err);
-    }finally{
-      document.documentElement.classList.remove('junta-role-checking');
-      document.documentElement.classList.add('junta-role-ready');
-      document.dispatchEvent(new CustomEvent('junta:v71-role-ready',{detail:{role}}));
-    }
+      setBodyRole();avatar();saveCache();
+      if(role==='seller'&&business?.onboarding_complete){setActiveView('seller');installGuard();openSeller('dashboard');}
+    }catch(err){console.warn('Junta role validation',err?.message||err);}
   }
-
+  async function boot(){
+    if(booting)return;booting=true;applyCached();
+    const watchdog=setTimeout(emitReady,650);
+    try{await validate();}finally{clearTimeout(watchdog);emitReady();booting=false;}
+  }
   window.JuntaRoleGate={get role(){return role},get profile(){return profile},get business(){return business},initials,avatar,openSeller};
+  if(db)db.auth.onAuthStateChange((event,s)=>{session=s;if(event==='SIGNED_OUT'){role='guest';profile=null;business=null;clearCache();setBodyRole();avatar();readySent=false;emitReady();}else if(['SIGNED_IN','USER_UPDATED'].includes(event)){setTimeout(()=>{readySent=false;boot()},0);}});
   boot();
 })();
