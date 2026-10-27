@@ -23,6 +23,7 @@ if (!html.includes('product-v42.js')) html = html.replace('</body>', '  <script 
 if (!html.includes('master-v43.js')) html = html.replace('</body>', '  <script src="/master-v43.js?v=43"></script>\n</body>');
 if (!html.includes('landing-v50.js')) html = html.replace('</body>', '  <script src="/landing-v50.js?v=50"></script>\n</body>');
 if (!html.includes('experience-v51.js')) html = html.replace('</body>', '  <script src="/experience-v51.js?v=51"></script>\n</body>');
+if (!html.includes('fixes-v52.js')) html = html.replace('</body>', '  <script src="/fixes-v52.js?v=52"></script>\n</body>');
 writeFileSync('dist/index.html', html);
 
-console.log('Junta V51 polished auth seller and real CEP discovery ready');
+console.log('Junta V52 CEP backend reliability fixes ready');
