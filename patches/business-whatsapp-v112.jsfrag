@@ -1,0 +1,10 @@
+  function openBusinessWhatsapp(){
+    if(state.role!=='seller'||!state.business?.id)return;
+    openOverlay(`<div class="j-modal"><div class="j-modal-head"><div><span class="j-kicker">PEDIDOS PELO WHATSAPP</span><h2>WhatsApp da empresa</h2><p>É para este número que os compradores enviarão o pedido depois que a meta fechar.</p></div><button class="j-close" data-close>×</button></div><form class="j-form" id="businessWhatsappForm"><label>WhatsApp com DDD<input name="whatsapp" inputmode="tel" value="${esc(state.business.whatsapp||'')}" placeholder="Ex.: 11 99999-9999" required></label><div class="j-order-protection"><b>Use um número que receba pedidos</b><span>O Junta monta a mensagem com produto, preço liberado, endereço, pagamento, troco e adicionais.</span></div><button class="j-btn primary" type="submit">Salvar WhatsApp</button></form></div>`);
+    $('#businessWhatsappForm',overlay).onsubmit=async e=>{
+      e.preventDefault();const btn=$('button[type="submit"]',e.currentTarget),value=String(new FormData(e.currentTarget).get('whatsapp')||'').trim(),digits=normalizeWhatsapp(value);
+      if(digits.length<12||digits.length>13){toast('Informe um WhatsApp válido com DDD.');return;}
+      btn.disabled=true;btn.textContent='Salvando...';
+      try{const {data,error}=await db.from('businesses').update({whatsapp:value}).eq('id',state.business.id).select('*').single();if(error)throw error;state.business=data;closeOverlay();toast('WhatsApp de pedidos salvo.');setAvatar();if(state.route==='account')renderAccount();else renderSeller('groups');}catch(err){toast(err.message||'Não foi possível salvar o WhatsApp.');btn.disabled=false;btn.textContent='Salvar WhatsApp';}
+    };
+  }
