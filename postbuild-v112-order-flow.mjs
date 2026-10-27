@@ -10,8 +10,7 @@ const whatsappFlow=readFileSync('patches/business-whatsapp-v112.jsfrag','utf8').
 
 function replaceChecked(label,needle,replacement){
   const before=app;
-  if(needle instanceof RegExp) app=app.replace(needle,()=>replacement);
-  else app=app.replace(needle,replacement);
+  app=app.replace(needle,()=>replacement);
   if(app===before)throw new Error(`V112 patch failed: ${label}`);
 }
 
