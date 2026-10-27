@@ -1,0 +1,45 @@
+  function renderBuyer(tab='home'){
+    if(state.role!=='buyer')return;
+    state.route=tab==='home'?'buyer-home':tab==='groups'?'buyer-groups':'buyer-explore';
+    renderBottomNav();
+    const name=state.profile?.display_name||'Você';
+    const firstName=esc(name.split(' ')[0]||'Você');
+    const city=state.profile?.city||'';
+    const uf=state.profile?.state||'';
+    const neighborhood=state.profile?.neighborhood||'';
+    const region=[city,uf].filter(Boolean).join(' · ');
+    const detailedRegion=[neighborhood,city,uf].filter(Boolean).join(' · ');
+    const title=tab==='groups'?'Seus grupos.':tab==='explore'?'Explore sua região.':region?'Ofertas perto de você.':'Vamos encontrar ofertas perto de você.';
+    const subtitle=tab==='groups'?'Acompanhe os grupos em que você entrou.':region?`Seu CEP está ativo em ${esc(region)}. Aqui aparecem grupos reais aprovados da sua região.`:'Informe seu CEP uma vez e o JUNTA procura grupos reais na sua região.';
+    let videoHidden=false;
+    try{videoHidden=localStorage.getItem('junta_buyer_intro_hidden_v1')==='1'}catch(_e){}
+    const welcomeVideo=tab==='home'&&!videoHidden?`<section class="j-buyer-video-hero" id="buyerWelcomeVideo" aria-label="Como funciona o JUNTA">
+      <button class="j-video-dismiss" id="dismissBuyerVideo" type="button" aria-label="Fechar apresentação">×</button>
+      <div class="j-buyer-video-frame">
+        <video class="j-welcome-video" autoplay muted loop playsinline preload="metadata" aria-label="Apresentação do JUNTA">
+          <source src="/assets/junta-apresentacao.mp4" type="video/mp4">
+        </video>
+        <span class="j-video-duration">20 SEG</span>
+        <span class="j-video-live"><i></i> COMO FUNCIONA</span>
+      </div>
+      <div class="j-buyer-video-copy">
+        <span class="j-video-eyebrow"><i></i> SEU NOVO JEITO DE PEDIR</span>
+        <h2>Junta gente.<br>Baixa o preço.</h2>
+        <p>Digite seu CEP, encontre uma oferta perto de você e escolha a meta que quer alcançar. Quando o grupo completa, todo mundo paga menos.</p>
+        <div class="j-video-steps">
+          <span><b>1</b> Seu CEP</span>
+          <span><b>2</b> Sua meta</span>
+          <span><b>3</b> Preço menor</span>
+        </div>
+      </div>
+    </section>`:'';
+    app.innerHTML=`<div class="j-shell j-app-shell j-buyer-shell">
+      <div class="j-buyer-header j-buyer-header-v118"><div><span class="j-kicker">OLÁ, ${firstName}</span><h1>${title}</h1><p>${subtitle}</p></div><span class="j-buyer-trust">Juntos, a gente paga menos.</span></div>
+      ${tab==='home'?`<section class="j-buyer-region-card"><div class="j-region-pin">${icon('pin')}</div><div class="j-region-copy"><span class="j-kicker">SUA REGIÃO</span><h2>${region?esc(region):'CEP ainda não informado'}</h2><p>${region?`Buscando oportunidades reais perto de ${esc(detailedRegion||region)}.`:'Informe seu CEP para começar a encontrar grupos próximos.'}</p></div><button class="j-region-change" id="changeCep">${region?'Alterar CEP':'Informar CEP'}</button></section>${welcomeVideo}`:''}
+      <div id="buyerBody" class="j-buyer-body-v118"><div class="j-skeleton"></div></div>
+    </div>`;
+    if($('#changeCep'))$('#changeCep').onclick=openCepModal;
+    if($('#dismissBuyerVideo'))$('#dismissBuyerVideo').onclick=()=>{try{localStorage.setItem('junta_buyer_intro_hidden_v1','1')}catch(_e){};const el=$('#buyerWelcomeVideo');if(el){el.style.opacity='0';el.style.transform='translateY(-6px)';setTimeout(()=>el.remove(),180)}};
+    const requested=state.route;
+    loadBuyerData().then(()=>{if(state.route!==requested)return;paintBuyer(tab);}).catch(err=>{if(state.route!==requested)return;$('#buyerBody').innerHTML=`<div class="j-empty"><h3>Não conseguimos carregar agora.</h3><p>${esc(err.message)}</p><button class="j-btn primary" id="buyerRetry">Tentar novamente</button></div>`;$('#buyerRetry').onclick=()=>{state.buyerLoadedAt=0;renderBuyer(tab)}});
+  }
