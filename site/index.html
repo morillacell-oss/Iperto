@@ -8,7 +8,10 @@
   <title>Junta — Compre junto. Pague menos.</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="manifest" href="/manifest.webmanifest" />
-  <link rel="stylesheet" href="/app-v100.css?v=100" />
+  <link rel="stylesheet" href="/app-v100.css?v=101" />
+  <style>
+    .j-overlay[hidden], .j-bottom-nav[hidden], [hidden] { display: none !important; }
+  </style>
 </head>
 <body>
   <header class="j-topbar" id="topbar">
@@ -29,6 +32,6 @@
   <div class="j-toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/app-v100.js?v=100"></script>
+  <script src="/app-v100.js?v=101"></script>
 </body>
 </html>
