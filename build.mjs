@@ -18,6 +18,7 @@ if (!html.includes('polish-v31.js')) html = html.replace('</body>', '  <script s
 if (!html.includes('product-v40.js')) html = html.replace('</body>', '  <script src="/product-v40.js?v=40"></script>\n</body>');
 if (!html.includes('copy-v41.js')) html = html.replace('</body>', '  <script src="/copy-v41.js?v=41"></script>\n</body>');
 if (!html.includes('product-v42.js')) html = html.replace('</body>', '  <script src="/product-v42.js?v=42"></script>\n</body>');
+if (!html.includes('master-v43.js')) html = html.replace('</body>', '  <script src="/master-v43.js?v=43"></script>\n</body>');
 writeFileSync('dist/index.html', html);
 
-console.log('Junta V42 account seller and master rebuild ready');
+console.log('Junta V43 real-only master analytics ready');
