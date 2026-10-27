@@ -1,0 +1,46 @@
+  function paintBuyer(tab){
+    const root=$('#buyerBody');if(!root)return;
+    const membership=new Map(state.buyerWaitlist.map(x=>[x.offer_id,x]));
+    const activeJoined=new Set(state.buyerWaitlist.filter(x=>x.status!=='cancelled').map(x=>x.offer_id));
+    const offers=state.buyerOffers;
+    if(tab==='groups'){
+      const rows=offers.filter(o=>membership.has(o.id)).sort((a,b)=>(a.status==='cancelled')-(b.status==='cancelled'));
+      root.innerHTML=rows.length?`<div class="j-buyer-section-head"><span class="j-kicker">MEUS GRUPOS</span><h2>Acompanhe o que você entrou.</h2><p>Veja o progresso e as próximas faixas de preço.</p></div><div class="j-grid j-buyer-grid">${rows.map(o=>buyerOfferCard(o,activeJoined.has(o.id),membership.get(o.id))).join('')}</div>`:`<div class="j-empty"><h3>Você ainda não entrou em nenhum grupo.</h3><p>Explore ofertas da sua região e participe.</p></div>`;
+    } else {
+      const activeOffers=offers.filter(o=>o.status!=='cancelled');
+      const flash=activeOffers.filter(o=>o.price_flash_until&&new Date(o.price_flash_until)>new Date());
+      if(!activeOffers.length){
+        root.innerHTML=`<div class="j-empty j-buyer-empty"><span class="j-kicker">SUA REGIÃO</span><h3>No momento não há ofertas por perto.</h3><p>Quando um comércio aprovado abrir um grupo na sua região, ele vai aparecer aqui.</p></div>`;
+      }else{
+        const featured=flash[0]||activeOffers[0];
+        const city=state.profile?.city||'sua região';
+        const discovery=tab==='home'?localDiscoveryBanner(featured,activeOffers.length,city):`<div class="j-buyer-section-head"><span class="j-kicker">EXPLORAR</span><h2>Grupos abertos na sua região.</h2><p>Entre, acompanhe as faixas e ajude o preço a cair.</p></div>`;
+        root.innerHTML=`${discovery}${flash.length?`<div class="j-flash-stack">${flash.map(flashCard).join('')}</div>`:''}<div class="j-buyer-section-head j-buyer-offers-head"><span class="j-kicker">PERTO DE VOCÊ</span><h2>${activeOffers.length===1?'1 grupo aberto agora':`${activeOffers.length} grupos abertos agora`}</h2><p>Ofertas reais de comércios aprovados. Entrar no grupo não cobra nada agora.</p></div><div class="j-grid j-buyer-grid">${activeOffers.map(o=>buyerOfferCard(o,activeJoined.has(o.id),membership.get(o.id))).join('')}</div>`;
+      }
+    }
+    $$('[data-buyer-offer]',root).forEach(b=>b.onclick=()=>openBuyerOffer(offers.find(o=>o.id===b.dataset.buyerOffer)));
+  }
+
+  function localDiscoveryBanner(o,count,city){
+    const b=businessOf(o),title=esc(o.title),store=esc(b.name||'um comércio local');
+    return `<section class="j-local-discovery"><div class="j-local-orb one"></div><div class="j-local-orb two"></div><div class="j-local-content"><span class="j-local-label"><i></i>PROMOÇÃO ENCONTRADA NA SUA REGIÃO</span><h2>${count===1?'Olha o que apareceu perto de você 👀':`Encontramos ${count} oportunidades perto de você`}</h2><p>${store} abriu um grupo para <strong>${title}</strong> em ${esc(city)}. Quanto mais gente entra, mais perto o grupo chega do melhor preço.</p><div class="j-local-proof"><span>GRUPO ABERTO</span><span>ENTRAR NÃO COBRA</span><span>PREÇO CAI POR FAIXA</span></div></div></section>`;
+  }
+
+  function buyerOfferCard(o,joined,membership){
+    const cancelled=o.status==='cancelled'||membership?.status==='cancelled';
+    const s=statsOf(o),w=Number(s.waitlist_count||0),target=Number(o.queue_target||25),p=pct(w,target),b=businessOf(o),tiers=tiersOf(o);
+    const firstTier=tiers[0],bestTier=tiers[tiers.length-1];
+    const regular=Number(o.regular_price||0),firstPrice=Number(firstTier?.unit_price||o.junta_price||0),bestPrice=Number(bestTier?.unit_price||o.junta_price||0),saving=Math.max(0,regular-bestPrice);
+    if(cancelled){
+      return `<button class="j-offer j-buyer-promo-card j-offer-cancelled" data-buyer-offer="${o.id}"><div class="j-offer-img">${o.image_url?`<img src="${esc(o.image_url)}" alt="${esc(o.title)}">`:''}<span class="j-badge cancelled">GRUPO CANCELADO</span></div><div class="j-offer-body"><div class="j-offer-store">${esc(b.name||'Comércio')}</div><h3>${esc(o.title)}</h3><div class="j-cancelled-note"><strong>GRUPO CANCELADO</strong><span>INCOMPLETO</span><small>${esc(membership?.cancellation_reason||o.cancel_reason||'Este grupo foi encerrado pelo vendedor.')}</small></div></div></button>`;
+    }
+    const progressText=w===0?'Grupo começando agora — seja um dos primeiros':w===1?'1 pessoa já entrou no grupo':`${w} pessoas já entraram no grupo`;
+    return `<button class="j-offer j-buyer-promo-card" data-buyer-offer="${o.id}">
+      <div class="j-offer-img j-buyer-card-media">${o.image_url?`<img src="${esc(o.image_url)}" alt="${esc(o.title)}">`:''}<div class="j-buyer-card-badges"><span class="j-badge open">GRUPO ABERTO</span>${saving>0?`<span class="j-saving-badge">ECONOMIZE ATÉ ${money(saving)}</span>`:''}</div></div>
+      <div class="j-offer-body j-buyer-card-body"><div class="j-store-line">${b.logo_url?`<span class="j-store-logo"><img src="${esc(b.logo_url)}" alt="${esc(b.name||'Loja')}"></span>`:''}<div><small>OFERTA DE</small><strong>${esc(b.name||'Comércio local')}</strong></div></div><h3>${esc(o.title)}</h3>
+      <div class="j-buyer-price-block"><div><small>PREÇO NORMAL</small><s>${money(regular)}</s></div><div><small>PODE CHEGAR A</small><strong>${money(bestPrice)}</strong></div></div>
+      ${firstTier?`<div class="j-first-tier"><span>Primeira faixa</span><strong>${firstTier.people_count} pessoas → ${money(firstPrice)}</strong></div>`:''}
+      <div class="j-progress"><i style="width:${p}%"></i></div><div class="j-progress-meta"><span>${w} de ${target} pessoas</span><span>${Math.max(0,target-w)} para a meta</span></div><p class="j-progress-copy">${progressText}</p>
+      <span class="j-card-cta">${joined?'Você já está no grupo':'Ver grupo e entrar'} <b>→</b></span><small class="j-safe-copy">Entrar no grupo não cobra nada agora.</small></div>
+    </button>`;
+  }
