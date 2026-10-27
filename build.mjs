@@ -18,13 +18,13 @@ if (!html.includes('experience-v51.css')) html = html.replace('</head>', '  <lin
 if (!html.includes('product-v60.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/product-v60.css?v=60">\n</head>');
 if (!html.includes('account-v62.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/account-v62.css?v=62">\n</head>');
 if (!html.includes('seller-app-v70.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/seller-app-v70.css?v=70">\n</head>');
-if (!html.includes('role-gate-v71.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/role-gate-v71.css?v=82">\n</head>');
-if (!html.includes('runtime-v80.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/runtime-v80.css?v=82">\n</head>');
+if (!html.includes('role-gate-v71.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/role-gate-v71.css?v=83">\n</head>');
+if (!html.includes('runtime-v80.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/runtime-v80.css?v=83">\n</head>');
 
 if (!html.includes('role-gate-v71.js')) {
   html = html.replace(
     '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>',
-    '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>\n  <script src="/role-gate-v71.js?v=82"></script>'
+    '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>\n  <script src="/role-gate-v71.js?v=83"></script>'
   );
 }
 
@@ -41,8 +41,8 @@ if (!html.includes('buyer-region-v53.js')) html = html.replace('</body>', '  <sc
 if (!html.includes('product-v60.js')) html = html.replace('</body>', '  <script src="/product-v60.js?v=60"></script>\n</body>');
 if (!html.includes('runtime-v61.js')) html = html.replace('</body>', '  <script src="/runtime-v61.js?v=61"></script>\n</body>');
 if (!html.includes('account-v62.js')) html = html.replace('</body>', '  <script src="/account-v62.js?v=62"></script>\n</body>');
-if (!html.includes('seller-app-v80.js')) html = html.replace('</body>', '  <script src="/seller-app-v80.js?v=82"></script>\n</body>');
-if (!html.includes('runtime-v80.js')) html = html.replace('</body>', '  <script src="/runtime-v80.js?v=82"></script>\n</body>');
+if (!html.includes('seller-app-v80.js')) html = html.replace('</body>', '  <script src="/seller-app-v80.js?v=83"></script>\n</body>');
+if (!html.includes('runtime-v80.js')) html = html.replace('</body>', '  <script src="/runtime-v80.js?v=83"></script>\n</body>');
 writeFileSync('dist/index.html', html);
 
-console.log('Junta V82 instant role routing, nonblocking boot and fast runtime ready');
+console.log('Junta V83 mobile scroll, stable header avatar and loop-free runtime ready');
