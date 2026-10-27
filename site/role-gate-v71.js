@@ -58,19 +58,23 @@
 
   function sellerSectionFromNav(view){return view==='offers'?'offers':view==='seller'?'groups':'dashboard'}
 
+  function activateSellerSection(section='dashboard'){
+    let tries=0;
+    const tryActivate=()=>{
+      tries++;
+      if(window.JuntaSellerApp?.show){window.JuntaSellerApp.show(section);return true}
+      const tab=$(`[data-v70-section="${section}"]`);
+      if(tab){tab.click();return true}
+      if(tries<30){setTimeout(tryActivate,100);return false}
+      return false;
+    };
+    tryActivate();
+  }
+
   function openSeller(section='dashboard'){
     setActiveView('seller');
-    if(window.JuntaSellerApp?.show){
-      window.JuntaSellerApp.show(section);
-    } else {
-      document.dispatchEvent(new CustomEvent('junta:v71-seller-nav',{detail:{section}}));
-      let tries=0;
-      const t=setInterval(()=>{
-        tries++;
-        if(window.JuntaSellerApp?.show){clearInterval(t);window.JuntaSellerApp.show(section)}
-        else if(tries>20)clearInterval(t);
-      },100);
-    }
+    document.dispatchEvent(new CustomEvent('junta:v71-seller-nav',{detail:{section}}));
+    activateSellerSection(section);
   }
 
   function enforceSeller(){
