@@ -1,0 +1,62 @@
+  function tierRunFor(o,target){
+    return (state.buyerTierRuns||[]).find(r=>r.offer_id===o?.id&&Number(r.target_people)===Number(target)&&r.status==='achieved')||null;
+  }
+
+  function sellerTierRunsFor(offerId){
+    return (state.sellerTierRuns||[]).filter(r=>r.offer_id===offerId&&r.status==='achieved').sort((a,b)=>Number(a.target_people)-Number(b.target_people));
+  }
+
+  function buyerOrderFor(o,target){
+    return (state.buyerOrders||[]).find(x=>x.offer_id===o?.id&&Number(x.target_people)===Number(target))||null;
+  }
+
+  function orderStatusLabel(s){
+    return ({submitted:'Pedido salvo',whatsapp_opened:'Enviado ao WhatsApp',confirmed:'Confirmado',preparing:'Em preparo',ready:'Pronto',delivered:'Entregue',cancelled:'Cancelado'})[s]||s||'—';
+  }
+
+  function completionNotificationStrip(role){
+    const rows=(role==='seller'?state.sellerNotifications:state.buyerNotifications)||[];
+    const unread=rows.filter(n=>!n.read_at);
+    if(!unread.length)return '';
+    const n=unread[0];
+    return `<button class="j-completion-alert" data-completion-notification="${n.id}" data-notification-offer="${n.offer_id||''}"><span class="j-completion-alert-icon">🎉</span><span><small>${role==='seller'?'NOVIDADE NO SEU GRUPO':'META ATINGIDA'}</small><strong>${esc(n.title)}</strong><em>${esc(n.body)}</em></span><b>Ver →</b></button>`;
+  }
+
+  async function openCompletionNotification(id,offerId,role){
+    const list=role==='seller'?state.sellerNotifications:state.buyerNotifications;
+    const item=(list||[]).find(n=>n.id===id);
+    if(item&&!item.read_at){
+      const now=new Date().toISOString();
+      item.read_at=now;
+      db.from('user_notifications').update({read_at:now}).eq('id',id).then(()=>{});
+    }
+    if(role==='seller'){
+      navigate('seller-groups');
+      return;
+    }
+    const offer=state.buyerOffers.find(o=>o.id===offerId);
+    if(offer)openBuyerOffer(offer);else navigate('buyer-groups');
+  }
+
+  let notificationChannel=null;
+  function startNotificationRealtime(){
+    if(!state.session?.user?.id||notificationChannel)return;
+    try{
+      notificationChannel=db.channel(`junta-notifications-${state.session.user.id}`)
+        .on('postgres_changes',{event:'INSERT',schema:'public',table:'user_notifications',filter:`user_id=eq.${state.session.user.id}`},payload=>{
+          const n=payload.new;
+          toast(n.title||'Novidade no Junta 🎉');
+          if(state.role==='seller'){
+            state.sellerNotifications=[n,...(state.sellerNotifications||[])];state.sellerLoadedAt=0;
+            if(state.route?.startsWith('seller-'))renderSeller(state.route.endsWith('groups')?'groups':state.route.endsWith('offers')?'offers':'dashboard');
+          }else if(state.role==='buyer'){
+            state.buyerNotifications=[n,...(state.buyerNotifications||[])];state.buyerLoadedAt=0;
+            if(state.route?.startsWith('buyer-'))renderBuyer(state.route.endsWith('groups')?'groups':state.route.endsWith('explore')?'explore':'home');
+          }
+        }).subscribe();
+    }catch(e){console.warn('notification realtime',e);}
+  }
+
+  function stopNotificationRealtime(){
+    if(notificationChannel){try{db.removeChannel(notificationChannel);}catch(e){}notificationChannel=null;}
+  }
