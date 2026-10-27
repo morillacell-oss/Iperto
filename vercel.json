@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node build.mjs && node postbuild-v104.mjs",
+  "buildCommand": "node build.mjs && node postbuild-v104.mjs && node postbuild-v107-pricing.mjs",
   "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": false,
