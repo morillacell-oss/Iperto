@@ -1,0 +1,15 @@
+import { readFileSync, writeFileSync } from 'node:fs';
+const appPath='dist/app-v100.js';
+const app=readFileSync(appPath,'utf8');
+new Function(app);
+for(const token of ['buyer_submit_group_order','buyer_choose_offer_tier','startNotificationRealtime']) if(!app.includes(token)) throw new Error(`V117 validation missing ${token}`);
+const cssPath='dist/app-v100.css';
+let css=readFileSync(cssPath,'utf8');
+const wow=readFileSync('patches/wow-v117.cssfrag','utf8');
+for(const token of ['.j-offer','.j-modal','.j-bottom-nav','.j-metric','.j-completion-alert']) if(!wow.includes(token)) throw new Error(`V117 CSS missing ${token}`);
+css+='\n'+wow+'\n';
+writeFileSync(cssPath,css);
+const indexPath='dist/index.html';
+let index=readFileSync(indexPath,'utf8').replace(/app-v100\.css\?v=\d+/g,'app-v100.css?v=117').replace(/app-v100\.js\?v=\d+/g,'app-v100.js?v=117');
+writeFileSync(indexPath,index);
+console.log('Junta V117 wow refinement ready');
