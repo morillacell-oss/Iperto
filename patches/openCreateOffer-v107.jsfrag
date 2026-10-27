@@ -1,0 +1,132 @@
+  function openCreateOffer(){
+    if(!state.business?.id){toast('Complete o cadastro da empresa primeiro.');return;}
+    const cats=CATEGORIES.map(c=>`<option value="${c[0]}">${c[1]}</option>`).join('');
+    const tierMeta=[
+      [5,'Primeira faixa'],[10,'Grupo crescendo'],[15,'Boa economia'],[20,'Quase no melhor'],[25,'Melhor preço']
+    ];
+    openOverlay(`<div class="j-modal j-create-offer-modal" style="width:min(720px,100%)">
+      <div class="j-modal-head"><div><span class="j-kicker">NOVA OFERTA</span><h2>Crie um grupo.</h2><p class="j-modal-sub">Defina seu produto e deixe o Junta ajudar a montar uma curva de preços que faça sentido.</p></div><button class="j-close" data-close>×</button></div>
+      <form class="j-form" id="createOfferForm">
+        <section class="j-create-section">
+          <div class="j-create-section-title"><span>1</span><div><b>Produto</b><small>O que as pessoas vão comprar juntas?</small></div></div>
+          <label>Foto do produto<input name="image" type="file" accept="image/*" required></label>
+          <label>Produto<input name="title" required placeholder="Ex.: Smash duplo"></label>
+          <label>Descrição<textarea name="description" rows="3" placeholder="Explique o que está incluso"></textarea></label>
+          <label>Categoria<select name="category" required>${cats}</select></label>
+        </section>
+
+        <section class="j-create-section">
+          <div class="j-create-section-title"><span>2</span><div><b>Limites da oferta</b><small>Informe o preço comum e o menor valor que ainda é saudável para sua empresa.</small></div></div>
+          <div class="j-price-basics">
+            <label>Preço normal <small>Preço vendido fora do grupo</small><div class="j-money-input"><span>R$</span><input name="regular" type="number" min="0.01" step="0.01" inputmode="decimal" required></div></label>
+            <label>Piso sustentável <small>Menor preço que você aceita</small><div class="j-money-input"><span>R$</span><input name="floor" type="number" min="0.01" step="0.01" inputmode="decimal" required></div></label>
+          </div>
+          <label>Estoque disponível<input name="stock" type="number" min="25" value="25" required></label>
+          <div class="j-floor-explainer" id="floorExplainer"><b>O que é o piso sustentável?</b><span>Nenhuma faixa do grupo poderá ficar abaixo desse valor. Assim você nunca cria uma oferta com prejuízo.</span></div>
+        </section>
+
+        <section class="j-create-section j-tier-builder">
+          <div class="j-tier-builder-head"><div><div class="j-create-section-title"><span>3</span><div><b>Preço por tamanho do grupo</b><small>Quanto mais pessoas entram, menor fica o preço.</small></div></div></div><button type="button" class="j-suggest-prices" id="suggestPrices">✨ Sugerir faixas</button></div>
+          <div class="j-tier-rule" id="tierRule"><strong>Como funciona</strong><span>Preencha o preço normal e o piso. Depois toque em “Sugerir faixas” ou edite manualmente.</span></div>
+          <div class="j-tier-editor">
+            ${tierMeta.map(([n,label],i)=>`<div class="j-tier-edit-row" data-tier-row="${n}"><div class="j-tier-people"><span>${n}</span><div><b>${n} pessoas</b><small>${label}</small></div></div><div class="j-tier-value"><small class="j-tier-discount" data-tier-discount="${n}">—</small><div class="j-money-input compact"><span>R$</span><input name="p${n}" data-tier-input="${n}" type="number" min="0.01" step="0.01" inputmode="decimal" required></div></div></div>`).join('')}
+          </div>
+          <div class="j-tier-status neutral" id="tierStatus"><span class="j-tier-status-icon">i</span><div><b>Monte suas faixas</b><small>O último preço deve ser igual ou maior que o piso sustentável.</small></div></div>
+        </section>
+
+        <button class="j-btn primary j-submit-offer" type="submit">Enviar para análise</button>
+      </form>
+    </div>`);
+
+    const form=$('#createOfferForm',overlay);
+    const regularInput=$('input[name="regular"]',form);
+    const floorInput=$('input[name="floor"]',form);
+    const tierInputs=$$('[data-tier-input]',form);
+    const tierStatus=$('#tierStatus',form);
+    const tierRule=$('#tierRule',form);
+    const suggestBtn=$('#suggestPrices',form);
+    const moneyText=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    const round2=v=>Math.round((Number(v)+Number.EPSILON)*100)/100;
+
+    function setStatus(type,title,text){
+      tierStatus.className=`j-tier-status ${type}`;
+      tierStatus.innerHTML=`<span class="j-tier-status-icon">${type==='valid'?'✓':type==='invalid'?'!':'i'}</span><div><b>${title}</b><small>${text}</small></div>`;
+    }
+
+    function updateDiscounts(){
+      const regular=Number(regularInput.value);
+      tierInputs.forEach(inp=>{
+        const n=inp.dataset.tierInput,v=Number(inp.value),badge=$(`[data-tier-discount="${n}"]`,form);
+        if(regular>0&&v>0&&v<regular){const discount=((regular-v)/regular)*100;badge.textContent=`-${discount.toFixed(discount>=10?0:1).replace('.',',')}%`;}
+        else badge.textContent='—';
+      });
+    }
+
+    function validateTiers(showNeutral=true){
+      const regular=Number(regularInput.value),floor=Number(floorInput.value);
+      const prices=tierInputs.map(i=>Number(i.value));
+      $$('[data-tier-row]',form).forEach(r=>r.classList.remove('valid','invalid'));
+      updateDiscounts();
+
+      if(!(regular>0)&&showNeutral){setStatus('neutral','Primeiro informe o preço normal','Depois vamos calcular quanto cada grupo pode economizar.');return false;}
+      if(!(floor>0)&&showNeutral){setStatus('neutral','Agora informe seu piso sustentável',`Ele precisa ser menor que ${moneyText(regular)}.`);return false;}
+      if(floor>=regular){setStatus('invalid','O piso precisa ser menor que o preço normal',`Preço normal: ${moneyText(regular)} · Piso informado: ${moneyText(floor)}.`);return false;}
+      if(regular-floor<0.05){setStatus('invalid','Pouco espaço entre preço e piso','Para criar 5 faixas diferentes, deixe pelo menos R$ 0,05 entre o preço normal e o piso.');return false;}
+      if(prices.some(v=>!v)){if(showNeutral)setStatus('neutral','Preencha as 5 faixas','Você também pode tocar em “Sugerir faixas” para preencher automaticamente.');return false;}
+
+      let previous=regular;
+      for(let i=0;i<prices.length;i++){
+        const v=prices[i],n=Number(tierInputs[i].dataset.tierInput),row=$(`[data-tier-row="${n}"]`,form);
+        if(v<floor){row.classList.add('invalid');setStatus('invalid',`${n} pessoas está abaixo do piso`,`${moneyText(v)} é menor que seu piso sustentável de ${moneyText(floor)}. Aumente essa faixa ou reduza conscientemente o piso.`);return false;}
+        if(v>=previous){row.classList.add('invalid');setStatus('invalid',`A faixa de ${n} pessoas precisa ficar mais barata`,`Ela precisa ser menor que ${moneyText(previous)}, que é o valor da faixa anterior.`);return false;}
+        row.classList.add('valid');previous=v;
+      }
+      setStatus('valid','Faixas prontas para análise',`Seu grupo começa em ${moneyText(prices[0])} e pode chegar a ${moneyText(prices[4])} com 25 pessoas, sem passar do piso de ${moneyText(floor)}.`);
+      return true;
+    }
+
+    function suggestPrices(){
+      const regular=Number(regularInput.value),floor=Number(floorInput.value);
+      if(!(regular>0)){regularInput.focus();setStatus('invalid','Informe o preço normal primeiro','Precisamos dele para calcular a economia de cada faixa.');return;}
+      if(!(floor>0)){floorInput.focus();setStatus('invalid','Informe o piso sustentável','Esse é o menor preço que o Junta poderá sugerir.');return;}
+      if(floor>=regular){floorInput.focus();setStatus('invalid','O piso precisa ser menor que o preço normal',`Use um valor abaixo de ${moneyText(regular)}.`);return;}
+      const gap=regular-floor;
+      if(gap<0.05){setStatus('invalid','Pouco espaço para 5 faixas','Aumente o preço normal ou reduza o piso em pelo menos R$ 0,05.');return;}
+      const ratios=[.20,.40,.60,.80,1];
+      let previous=regular;
+      tierInputs.forEach((inp,i)=>{
+        let value=round2(regular-gap*ratios[i]);
+        if(value>=previous)value=round2(previous-.01);
+        if(i===tierInputs.length-1)value=floor;
+        value=Math.max(floor,value);
+        inp.value=value.toFixed(2);
+        previous=value;
+      });
+      validateTiers(true);
+      tierRule.innerHTML=`<strong>Sugestão inteligente aplicada</strong><span>Você pode editar qualquer faixa. O Junta continuará validando para não passar do seu piso.</span>`;
+      tierRule.classList.add('suggested');
+    }
+
+    suggestBtn.onclick=suggestPrices;
+    [regularInput,floorInput,...tierInputs].forEach(inp=>inp.addEventListener('input',()=>validateTiers(false)));
+    regularInput.addEventListener('blur',()=>validateTiers(true));
+    floorInput.addEventListener('blur',()=>validateTiers(true));
+
+    form.onsubmit=async(e)=>{
+      e.preventDefault();
+      if(!validateTiers(true)){tierStatus.scrollIntoView({behavior:'smooth',block:'center'});return;}
+      const btn=$('button[type="submit"]',form),fd=new FormData(form);
+      const regular=Number(fd.get('regular')),floor=Number(fd.get('floor')),prices=[5,10,15,20,25].map(n=>Number(fd.get(`p${n}`)));
+      btn.disabled=true;btn.textContent='Enviando...';
+      try{
+        const file=fd.get('image');let image_url='';
+        if(file&&file.size){const safe=String(file.name||'foto.jpg').replace(/[^a-zA-Z0-9._-]/g,'-');const path=`${state.session.user.id}/${Date.now()}-${safe}`;const up=await db.storage.from('offer-images').upload(path,file,{upsert:false});if(up.error)throw up.error;image_url=db.storage.from('offer-images').getPublicUrl(path).data.publicUrl;}
+        const now=new Date(),close=new Date(now.getTime()+14*86400000);
+        const {data:offer,error}=await db.from('offers').insert({business_id:state.business.id,created_by:state.session.user.id,title:String(fd.get('title')).trim(),description:String(fd.get('description')||''),category:String(fd.get('category')),image_url,regular_price:regular,junta_price:prices[4],min_sustainable_price:floor,min_paid:5,max_units:Number(fd.get('stock')),queue_target:25,opens_at:now.toISOString(),closes_at:close.toISOString(),status:'pending',featured:false,is_demo:false,demo_seed_count:0,price_review_status:'unreviewed'}).select('id').single();
+        if(error)throw error;
+        const tiers=[5,10,15,20,25].map((n,i)=>({offer_id:offer.id,people_count:n,unit_price:prices[i]}));
+        const tr=await db.from('offer_price_tiers').insert(tiers);if(tr.error)throw tr.error;
+        toast('Oferta enviada para análise.');state.sellerLoadedAt=0;closeOverlay();navigate('seller-offers');
+      }catch(err){toast(err.message||'Não foi possível criar a oferta.');btn.disabled=false;btn.textContent='Enviar para análise';}
+    };
+  }
