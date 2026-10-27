@@ -15,6 +15,7 @@ if (!html.includes('product-v40.css')) html = html.replace('</head>', '  <link r
 if (!html.includes('product-v42.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/product-v42.css?v=42">\n</head>');
 if (!html.includes('landing-v50.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/landing-v50.css?v=50">\n</head>');
 if (!html.includes('experience-v51.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/experience-v51.css?v=51">\n</head>');
+if (!html.includes('product-v60.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/product-v60.css?v=60">\n</head>');
 if (!html.includes('categories-ui.js')) html = html.replace('</body>', '  <script src="/categories-ui.js?v=30"></script>\n</body>');
 if (!html.includes('polish-v31.js')) html = html.replace('</body>', '  <script src="/polish-v31.js?v=31"></script>\n</body>');
 if (!html.includes('product-v40.js')) html = html.replace('</body>', '  <script src="/product-v40.js?v=40"></script>\n</body>');
@@ -25,6 +26,7 @@ if (!html.includes('landing-v50.js')) html = html.replace('</body>', '  <script 
 if (!html.includes('experience-v51.js')) html = html.replace('</body>', '  <script src="/experience-v51.js?v=51"></script>\n</body>');
 if (!html.includes('fixes-v52.js')) html = html.replace('</body>', '  <script src="/fixes-v52.js?v=52"></script>\n</body>');
 if (!html.includes('buyer-region-v53.js')) html = html.replace('</body>', '  <script src="/buyer-region-v53.js?v=53"></script>\n</body>');
+if (!html.includes('product-v60.js')) html = html.replace('</body>', '  <script src="/product-v60.js?v=60"></script>\n</body>');
 writeFileSync('dist/index.html', html);
 
-console.log('Junta V53 buyer regional discovery ready');
+console.log('Junta V60 premium buyer seller experience ready');
