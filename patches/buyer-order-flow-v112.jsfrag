@@ -1,0 +1,135 @@
+  function openOfferModal(o,allowJoin){
+    const membership=state.buyerWaitlist.find(x=>x.offer_id===o.id);
+    const cancelled=o.status==='cancelled'||membership?.status==='cancelled';
+    const s=statsOf(o),w=Number(s.waitlist_count||0),target=Number(o.queue_target||25),ts=tiersOf(o),b=businessOf(o),joined=membership?.status!=='cancelled'&&!!membership;
+    let selectedTarget=Number(membership?.target_people||new URLSearchParams(location.search).get('tier')||0);
+    const currentRun=selectedTarget?tierRunFor(o,selectedTarget):null;
+    const currentOrder=selectedTarget?buyerOrderFor(o,selectedTarget):null;
+    const tierRows=ts.map(t=>{
+      const n=Number(t.people_count),count=tierMemberCount(o,n),remaining=Math.max(0,n-count),selected=n===selectedTarget,run=tierRunFor(o,n),mine=joined&&Number(membership?.target_people)===n;
+      return `<button type="button" class="j-tier-choice ${selected?'selected':''} ${run?'locked':''}" data-tier-choice="${n}" ${run&&!mine?'disabled':''}><span class="j-tier-radio"><i></i></span><div class="j-tier-choice-main"><strong>${n} pessoas</strong><small>${run?(mine?'🎉 Sua meta foi atingida':'Meta já atingida'):remaining===1?'Falta 1 pessoa':`Faltam ${remaining} pessoas`}</small></div><div class="j-tier-choice-price"><strong>${money(t.unit_price)}</strong><small>${run?'FECHOU':`${count} já escolheram`}</small></div></button>`;
+    }).join('');
+    const achievedPanel=currentRun&&joined?`<div class="j-achieved-panel"><span>🎉 SUA META FOI ATINGIDA</span><h3>${selectedTarget} pessoas fecharam essa faixa</h3><p>Seu preço de <strong>${money(currentRun.unit_price)}</strong> está liberado. Agora confira entrega, pagamento e adicionais antes de enviar o pedido.</p><button class="j-btn primary" id="finalizeOrderBtn">${currentOrder?'Ver / atualizar meu pedido':'Finalizar meu pedido'}</button></div>`:'';
+    openOverlay(`<div class="j-modal j-buyer-offer-modal"><div class="j-modal-head"><div><span class="j-kicker">${esc(b.name||'JUNTA')}</span><h2>${esc(o.title)}</h2></div><button class="j-close" data-close>×</button></div>${o.image_url?`<img src="${esc(o.image_url)}" alt="${esc(o.title)}" class="j-offer-modal-img">`:''}${cancelled?`<div class="j-cancelled-modal"><span>GRUPO CANCELADO</span><strong>INCOMPLETO</strong><p>${esc(membership?.cancellation_reason||o.cancel_reason||'O vendedor encerrou este grupo antes da meta.')}</p><small>Você não precisa fazer nada. Este registro fica aqui apenas no seu histórico.</small></div>`:`<div class="j-modal-price-summary"><div><small>PREÇO NORMAL</small><s>${money(o.regular_price)}</s></div><div><small>MELHOR PREÇO</small><strong>${money(ts[ts.length-1]?.unit_price||o.junta_price)}</strong></div></div>${achievedPanel}<div class="j-tier-picker-head"><span class="j-kicker">${currentRun&&joined?'OUTRAS FAIXAS':'ESCOLHA SUA META'}</span><h3>${currentRun&&joined?'Sua meta está travada porque já fechou.':'Em qual faixa você quer entrar?'}</h3><p>${currentRun&&joined?'Depois que a meta fecha, ninguém daquele grupo pode sair para desmontar a compra.':'Você conta uma única vez na oferta. Escolha o preço/meta que faz sentido para você.'}</p></div><div class="j-tier-choice-list">${tierRows}</div><div class="j-tier-selection" id="tierSelectionSummary"></div>${allowJoin&&!currentRun?`<button class="j-btn primary" id="joinOfferBtn" style="width:100%;margin-top:14px">${joined?'Salvar minha meta':'Escolha uma meta acima'}</button>${joined&&membership?.target_people?`<button class="j-btn secondary j-share-btn" id="shareOfferBtn" style="width:100%;margin-top:10px">Compartilhar com amigos</button>`:''}`:allowJoin&&currentRun?`<button class="j-btn secondary j-share-btn" id="shareOfferBtn" style="width:100%;margin-top:12px">Compartilhar conquista</button>`:`<button class="j-btn primary" id="authJoinBtn" style="width:100%;margin-top:16px">Entrar para participar</button>`}<p class="j-safe-copy center">${currentRun?'A finalização registra seu pedido no Junta antes de abrir o WhatsApp.':'Entrar no grupo não cobra nada agora.'}</p>`}</div>`);
+    if(cancelled)return;
+    if(currentRun&&joined&&$('#finalizeOrderBtn',overlay))$('#finalizeOrderBtn',overlay).onclick=()=>openCheckout(o,membership);
+    const primary=$('#joinOfferBtn',overlay);
+    const refreshSelection=()=>{
+      $$('[data-tier-choice]',overlay).forEach(btn=>btn.classList.toggle('selected',Number(btn.dataset.tierChoice)===selectedTarget));
+      const tier=ts.find(t=>Number(t.people_count)===selectedTarget),run=tierRunFor(o,selectedTarget);
+      const summary=$('#tierSelectionSummary',overlay);
+      if(!tier){if(summary)summary.innerHTML='<span>Escolha uma meta acima para continuar.</span>';if(primary){primary.disabled=true;primary.textContent='Escolha uma meta acima';}return;}
+      const remaining=tierRemaining(o,selectedTarget);
+      if(summary)summary.innerHTML=`<span>Sua escolha</span><strong>${selectedTarget} pessoas · ${money(tier.unit_price)}</strong><small>${run?'Essa meta já foi atingida.':remaining===1?'Falta 1 pessoa para fechar essa meta.':`Faltam ${remaining} pessoas para fechar essa meta.`}</small>`;
+      if(primary){
+        const current=Number(membership?.target_people||0);
+        if(run&&!currentRun){primary.disabled=true;primary.textContent='Essa meta já fechou';}
+        else if(joined&&current===selectedTarget){primary.disabled=true;primary.textContent='Você já está nesta meta';}
+        else{primary.disabled=false;primary.textContent=joined?(current?'Mudar para esta meta':'Salvar minha meta'):`Entrar na meta de ${selectedTarget} pessoas`;}
+      }
+    };
+    $$('[data-tier-choice]',overlay).forEach(btn=>{if(!btn.disabled)btn.onclick=()=>{if(currentRun&&joined)return;selectedTarget=Number(btn.dataset.tierChoice);refreshSelection();};});
+    refreshSelection();
+    if(allowJoin&&primary)primary.onclick=()=>saveBuyerTarget(o,selectedTarget,membership);
+    if(allowJoin&&$('#shareOfferBtn',overlay))$('#shareOfferBtn',overlay).onclick=()=>shareOffer(o,Number(membership?.target_people||selectedTarget));
+    if(!allowJoin)$('#authJoinBtn',overlay).onclick=()=>{localStorage.setItem('junta_pending_offer',o.id);if(selectedTarget)localStorage.setItem('junta_pending_tier',String(selectedTarget));closeOverlay();openAuth('buyer');};
+  }
+
+  async function saveBuyerTarget(o,target,membership){
+    if(![5,10,15,20,25].includes(Number(target))){toast('Escolha uma meta para continuar.');return;}
+    const btn=$('#joinOfferBtn',overlay);if(btn){btn.disabled=true;btn.textContent=membership?'Salvando...':'Entrando...';}
+    try{
+      track('join_intent',o);
+      const {error}=await db.rpc('buyer_choose_offer_tier',{p_offer_id:o.id,p_target_people:Number(target)});
+      if(error)throw error;
+      state.buyerLoadedAt=0;
+      await loadBuyerData(true);
+      const fresh=state.buyerOffers.find(x=>x.id===o.id)||o;
+      showJoinedSuccess(fresh,Number(target));
+      renderBottomNav();
+    }catch(err){toast(err.message||'Não foi possível entrar nessa meta.');if(btn){btn.disabled=false;btn.textContent='Tentar novamente';}}
+  }
+
+  function showJoinedSuccess(o,target){
+    const b=businessOf(o),tier=tiersOf(o).find(t=>Number(t.people_count)===Number(target)),remaining=tierRemaining(o,target),run=tierRunFor(o,target);
+    if(run){const m=state.buyerWaitlist.find(x=>x.offer_id===o.id);openCheckout(o,m);return;}
+    openOverlay(`<div class="j-modal j-joined-success"><div class="j-success-mark">✓</div><span class="j-kicker">VOCÊ ESTÁ NO GRUPO</span><h2>Meta escolhida: ${target} pessoas</h2><p>Você entrou na oferta <strong>${esc(o.title)}</strong>, da ${esc(b.name||'loja')}.</p><div class="j-success-target"><span>Seu preço nessa meta</span><strong>${money(tier?.unit_price||o.junta_price)}</strong><small>${remaining===1?'Falta só 1 pessoa para fechar.':`Restam ${remaining} pessoas para fechar essa meta.`}</small></div><div class="j-share-callout"><b>Chame a galera 👀</b><span>Compartilhe a oferta e ajude sua meta a fechar mais rápido.</span></div><button class="j-btn primary j-share-btn" id="successShareBtn">Compartilhar com amigos</button><button class="j-btn secondary" id="successDoneBtn">Ver meus grupos</button></div>`);
+    $('#successShareBtn',overlay).onclick=()=>shareOffer(o,target);
+    $('#successDoneBtn',overlay).onclick=()=>{closeOverlay();navigate('buyer-groups');};
+  }
+
+  function normalizeWhatsapp(v){
+    let d=String(v||'').replace(/\D/g,'');
+    if(d.length===10||d.length===11)d='55'+d;
+    return d;
+  }
+
+  function openCheckout(o,membership){
+    const target=Number(membership?.target_people||0),run=tierRunFor(o,target),existing=buyerOrderFor(o,target),b=businessOf(o);
+    if(!run){toast('Essa meta ainda não foi atingida.');return;}
+    const locked=existing&&['confirmed','preparing','ready','delivered'].includes(existing.status);
+    if(locked){openOrderSummary(o,existing,b);return;}
+    const p=state.profile||{},delivery=(existing?.fulfillment_method||'delivery')==='delivery';
+    openOverlay(`<div class="j-modal j-checkout-modal"><div class="j-modal-head"><div><span class="j-kicker">META ATINGIDA 🎉</span><h2>Finalize seu pedido</h2><p>Confira tudo antes de abrir o WhatsApp da ${esc(b.name||'empresa')}.</p></div><button class="j-close" data-close>×</button></div><div class="j-order-summary-top"><div><small>${esc(o.title)}</small><strong>${money(run.unit_price)}</strong></div><span>${target} pessoas</span></div><form class="j-form" id="groupOrderForm"><label>Como quer receber?<select name="fulfillment"><option value="delivery" ${delivery?'selected':''}>Entrega</option><option value="pickup" ${!delivery?'selected':''}>Retirada no estabelecimento</option></select></label><label>Nome de quem vai receber<input name="recipient" value="${esc(existing?.recipient_name||p.display_name||'')}" required></label><div id="deliveryFields"><div class="j-form-grid"><label>CEP<input name="postal" value="${esc(existing?.postal_code||p.postal_code||'')}" inputmode="numeric"></label><label>Rua<input name="street" value="${esc(existing?.street||'')}" placeholder="Nome da rua"></label><label>Número<input name="number" value="${esc(existing?.address_number||'')}" placeholder="123"></label><label>Complemento <small>opcional</small><input name="complement" value="${esc(existing?.complement||'')}" placeholder="Apto, bloco..."></label><label>Bairro<input name="neighborhood" value="${esc(existing?.neighborhood||p.neighborhood||'')}"></label><label>Cidade<input name="city" value="${esc(existing?.city||p.city||'')}"></label><label>Estado<input name="state" value="${esc(existing?.state||p.state||'')}" maxlength="2"></label><label>Referência <small>opcional</small><input name="reference" value="${esc(existing?.reference_note||'')}" placeholder="Próximo a..."></label></div></div><label>Forma de pagamento<select name="payment"><option value="pix" ${existing?.payment_method==='pix'?'selected':''}>Pix</option><option value="card_on_delivery" ${existing?.payment_method==='card_on_delivery'?'selected':''}>Cartão na entrega/retirada</option><option value="cash" ${existing?.payment_method==='cash'?'selected':''}>Dinheiro</option><option value="other" ${existing?.payment_method==='other'?'selected':''}>Combinar com o estabelecimento</option></select></label><div id="cashFields"><label>Precisa de troco? <small>opcional</small><div class="j-money-input"><span>R$</span><input name="change" type="number" min="0" step="0.01" value="${existing?.cash_change_for||''}" placeholder="Ex.: 50,00"></div></label></div><label>Quer acrescentar algo? <small>opcional</small><textarea name="extras" rows="3" placeholder="Ex.: 1 refrigerante, adicionar bacon, sem cebola...">${esc(existing?.extras||'')}</textarea><small class="j-field-help">Itens extras podem ter valor adicional cobrado pelo estabelecimento.</small></label><div class="j-order-protection"><b>Pedido organizado pelo Junta</b><span>O valor da oferta é ${money(run.unit_price)}. Pagamento e extras são combinados diretamente com o estabelecimento.</span></div><button class="j-btn primary" type="submit">${normalizeWhatsapp(b.whatsapp)?'Salvar pedido e abrir WhatsApp':'Salvar pedido no Junta'}</button>${!normalizeWhatsapp(b.whatsapp)?`<p class="j-whatsapp-missing">A empresa ainda não cadastrou o WhatsApp de pedidos. Seu pedido será salvo e ficará visível no painel dela.</p>`:''}</form></div>`);
+    const form=$('#groupOrderForm',overlay),fulfillment=$('select[name="fulfillment"]',form),payment=$('select[name="payment"]',form),deliveryFields=$('#deliveryFields',form),cashFields=$('#cashFields',form);
+    const syncFields=()=>{deliveryFields.hidden=fulfillment.value!=='delivery';cashFields.hidden=payment.value!=='cash';};
+    fulfillment.onchange=syncFields;payment.onchange=syncFields;syncFields();
+    form.onsubmit=async e=>{
+      e.preventDefault();const btn=$('button[type="submit"]',form),fd=new FormData(form),isDelivery=fd.get('fulfillment')==='delivery';
+      if(isDelivery&&(!String(fd.get('street')||'').trim()||!String(fd.get('number')||'').trim()||!String(fd.get('city')||'').trim()||!String(fd.get('state')||'').trim())){toast('Para entrega, preencha rua, número, cidade e estado.');return;}
+      btn.disabled=true;btn.textContent='Salvando pedido...';
+      try{
+        const params={p_tier_run_id:run.id,p_fulfillment_method:String(fd.get('fulfillment')),p_recipient_name:String(fd.get('recipient')).trim(),p_postal_code:String(fd.get('postal')||'').trim(),p_street:isDelivery?String(fd.get('street')||'').trim():'',p_address_number:isDelivery?String(fd.get('number')||'').trim():'',p_complement:isDelivery?String(fd.get('complement')||'').trim():'',p_neighborhood:isDelivery?String(fd.get('neighborhood')||'').trim():'',p_city:isDelivery?String(fd.get('city')||'').trim():'',p_state:isDelivery?String(fd.get('state')||'').trim().toUpperCase():'',p_reference_note:isDelivery?String(fd.get('reference')||'').trim():'',p_payment_method:String(fd.get('payment')),p_cash_change_for:fd.get('payment')==='cash'&&fd.get('change')?Number(fd.get('change')):null,p_extras:String(fd.get('extras')||'').trim()};
+        const {data,error}=await db.rpc('buyer_submit_group_order',params);if(error)throw error;
+        const row=Array.isArray(data)?data[0]:data;
+        state.buyerOrders=[row,...(state.buyerOrders||[]).filter(x=>x.id!==row.id)];
+        if(normalizeWhatsapp(b.whatsapp))await openOrderWhatsapp(o,row,b);
+        else showOrderSaved(o,row,b,false);
+      }catch(err){toast(err.message||'Não foi possível salvar o pedido.');btn.disabled=false;btn.textContent='Tentar novamente';}
+    };
+  }
+
+  function orderAddressText(order){
+    if(order.fulfillment_method==='pickup')return 'Retirada no estabelecimento';
+    return [order.street,order.address_number,order.complement,order.neighborhood,order.city,order.state].filter(Boolean).join(', ');
+  }
+
+  function paymentText(order){
+    const base=({pix:'Pix',card_on_delivery:'Cartão na entrega/retirada',cash:'Dinheiro',other:'Combinar com o estabelecimento'})[order.payment_method]||order.payment_method;
+    return order.payment_method==='cash'&&order.cash_change_for?`${base} · troco para ${money(order.cash_change_for)}`:base;
+  }
+
+  async function openOrderWhatsapp(o,order,b){
+    const phone=normalizeWhatsapp(b.whatsapp),groupUrl=`${location.origin}/?offer=${encodeURIComponent(o.id)}&tier=${Number(order.target_people)}`;
+    if(!phone){showOrderSaved(o,order,b,false);return;}
+    const message=`🎉 *PEDIDO JUNTA ${order.order_code}*\n\n*Oferta:* ${o.title}\n*Grupo:* ${order.target_people} pessoas — META ATINGIDA\n*Preço do grupo:* ${money(order.unit_price)}\n\n*Cliente:* ${order.recipient_name}\n*Recebimento:* ${order.fulfillment_method==='delivery'?'Entrega':'Retirada no local'}\n${order.fulfillment_method==='delivery'?`*Endereço:* ${orderAddressText(order)}\n${order.reference_note?`*Referência:* ${order.reference_note}\n`:''}`:''}*Pagamento:* ${paymentText(order)}\n${order.extras?`*Adicionais / observações:* ${order.extras}\n`:''}\n*Grupo no Junta:* ${groupUrl}`;
+    try{await db.rpc('mark_order_whatsapp_opened',{p_order_id:order.id});}catch(e){console.warn('mark whatsapp',e);}
+    order.status=order.status==='submitted'?'whatsapp_opened':order.status;order.whatsapp_opened_at=order.whatsapp_opened_at||new Date().toISOString();
+    showOrderSaved(o,order,b,true);
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`,'_blank','noopener');
+  }
+
+  function showOrderSaved(o,order,b,opened){
+    openOverlay(`<div class="j-modal j-order-success"><div class="j-success-mark">✓</div><span class="j-kicker">PEDIDO ${esc(order.order_code)}</span><h2>${opened?'WhatsApp aberto':'Pedido salvo no Junta'}</h2><p>${opened?'Confira a mensagem e envie para o estabelecimento.':'A empresa já consegue ver seus dados no painel do Junta.'}</p><div class="j-order-recap"><div><span>Produto</span><strong>${esc(o.title)}</strong></div><div><span>Preço do grupo</span><strong>${money(order.unit_price)}</strong></div><div><span>Recebimento</span><strong>${esc(order.fulfillment_method==='delivery'?'Entrega':'Retirada')}</strong></div><div><span>Status</span><strong>${esc(orderStatusLabel(order.status))}</strong></div></div>${!opened?`<div class="j-whatsapp-missing-card"><b>WhatsApp ainda não configurado</b><span>A ${esc(b.name||'empresa')} precisa cadastrar o número de pedidos. Seu pedido não foi perdido.</span></div>`:''}<button class="j-btn primary" id="goMyGroups">Ir para Meus grupos</button></div>`);
+    $('#goMyGroups',overlay).onclick=()=>{closeOverlay();state.buyerLoadedAt=0;renderBuyer('groups');};
+  }
+
+  function openOrderSummary(o,order,b){
+    const canTalk=!!normalizeWhatsapp(b.whatsapp);
+    openOverlay(`<div class="j-modal j-order-detail"><div class="j-modal-head"><div><span class="j-kicker">${esc(order.order_code)}</span><h2>Seu pedido</h2></div><button class="j-close" data-close>×</button></div><div class="j-order-status-big"><span>${orderStatusLabel(order.status)}</span><strong>${money(order.unit_price)}</strong><small>Meta de ${order.target_people} pessoas</small></div><div class="j-order-recap"><div><span>Recebimento</span><strong>${esc(order.fulfillment_method==='delivery'?orderAddressText(order):'Retirada no estabelecimento')}</strong></div><div><span>Pagamento</span><strong>${esc(paymentText(order))}</strong></div>${order.extras?`<div><span>Adicionais</span><strong>${esc(order.extras)}</strong></div>`:''}</div>${canTalk?`<button class="j-btn primary" id="talkBusiness">Falar com o estabelecimento</button>`:''}<button class="j-btn secondary" id="closeOrder" data-close>Fechar</button></div>`);
+    if($('#talkBusiness',overlay))$('#talkBusiness',overlay).onclick=()=>openOrderWhatsapp(o,order,b);
+  }
+
+  async function createShareBanner(o,target){
+    const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1080;const ctx=canvas.getContext('2d');if(!ctx)return null;
+    const b=businessOf(o),tier=tiersOf(o).find(t=>Number(t.people_count)===Number(target)),remaining=tierRemaining(o,target);
+    ctx.fillStyle='#fffaf7';ctx.fillRect(0,0,1080,1080);ctx.fillStyle='#ff3b36';ctx.fillRect(0,0,1080,150);ctx.fillStyle='#fff';ctx.font='900 56px Arial';ctx.fillText('JUNTA',72,98);ctx.font='700 28px Arial';ctx.fillText('COMPRA EM GRUPO',800,95);
+    if(o.image_url){try{const img=await new Promise((resolve,reject)=>{const el=new Image();el.crossOrigin='anonymous';el.onload=()=>resolve(el);el.onerror=reject;el.src=o.image_url;});const ratio=Math.max(1080/img.width,430/img.height),w=img.width*ratio,h=img.height*ratio;ctx.drawImage(img,(1080-w)/2,150+(430-h)/2,w,h);}catch(e){ctx.fillStyle='#ffe9e6';ctx.fillRect(0,150,1080,430);}}else{ctx.fillStyle='#ffe9e6';ctx.fillRect(0,150,1080,430);}
+    ctx.fillStyle='#fffaf7';ctx.fillRect(0,580,1080,500);ctx.fillStyle='#7b706c';ctx.font='700 30px Arial';ctx.fillText(String(b.name||'Oferta local').slice(0,32),72,650);ctx.fillStyle='#171311';ctx.font='900 58px Arial';wrapCanvasText(ctx,String(o.title||'Oferta'),72,725,930,68,2);ctx.fillStyle='#ff3b36';ctx.font='900 72px Arial';ctx.fillText(money(tier?.unit_price||o.junta_price),72,900);ctx.fillStyle='#171311';ctx.font='800 34px Arial';ctx.fillText(`Meta: ${target} pessoas`,610,855);ctx.fillStyle=remaining?'#6f6662':'#159b6f';ctx.font='700 30px Arial';ctx.fillText(remaining?`Faltam ${remaining} para fechar`:'Meta completa!',610,905);ctx.fillStyle='#ffefed';ctx.fillRect(72,960,936,74);ctx.fillStyle='#ff3b36';ctx.font='800 28px Arial';ctx.fillText('ENTRE COMIGO NO JUNTA • PAGUE MENOS EM GRUPO',105,1007);return await new Promise(resolve=>canvas.toBlob(resolve,'image/png',.92));
+  }
+
+  function wrapCanvasText(ctx,text,x,y,maxWidth,lineHeight,maxLines=3){const words=String(text||'').split(/\s+/);let line='',lines=[];for(const word of words){const test=line?`${line} ${word}`:word;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word;if(lines.length>=maxLines)break;}else line=test;}if(lines.length<maxLines&&line)lines.push(line);lines.slice(0,maxLines).forEach((l,i)=>ctx.fillText(l,x,y+i*lineHeight));}
+
+  async function shareOffer(o,target){
+    const b=businessOf(o),tier=tiersOf(o).find(t=>Number(t.people_count)===Number(target)),remaining=tierRemaining(o,target),run=tierRunFor(o,target);const url=`${location.origin}/?offer=${encodeURIComponent(o.id)}&tier=${Number(target)}`;const message=`Olha essa oferta que achei no Junta 👀\n\n${o.title} na ${b.name||'loja'}\nMeta: ${target} pessoas • ${money(tier?.unit_price||o.junta_price)}\n${run?'A meta foi atingida! 🎉':remaining===1?'Falta só 1 pessoa para fechar.':`Faltam ${remaining} pessoas para fechar.`}\n\nVem ver no Junta:\n${url}`;track('share',o);try{const blob=await createShareBanner(o,target);if(blob&&navigator.share){const file=new File([blob],`junta-${slugify(o.title)}-${target}.png`,{type:'image/png'});if(!navigator.canShare||navigator.canShare({files:[file]})){await navigator.share({title:`${o.title} no Junta`,text:message,files:[file]});return;}}if(navigator.share){await navigator.share({title:`${o.title} no Junta`,text:message});return;}}catch(err){if(err?.name==='AbortError')return;console.warn('share',err);}window.open(`https://wa.me/?text=${encodeURIComponent(message)}`,'_blank','noopener');
+  }
