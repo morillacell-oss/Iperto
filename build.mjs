@@ -7,7 +7,6 @@ copyFileSync('favicon.svg', 'dist/favicon.svg');
 copyFileSync('manifest.webmanifest', 'dist/manifest.webmanifest');
 
 let html = readFileSync('dist/index.html', 'utf8');
-if (!html.includes('class="junta-role-checking"')) html = html.replace('<html lang="pt-BR">','<html lang="pt-BR" class="junta-role-checking">');
 if (!html.includes('assets-fix.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/assets-fix.css?v=2">\n</head>');
 if (!html.includes('categories-ui.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/categories-ui.css?v=30">\n</head>');
 if (!html.includes('identity-v30.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/identity-v30.css?v=30">\n</head>');
@@ -19,14 +18,14 @@ if (!html.includes('experience-v51.css')) html = html.replace('</head>', '  <lin
 if (!html.includes('product-v60.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/product-v60.css?v=60">\n</head>');
 if (!html.includes('account-v62.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/account-v62.css?v=62">\n</head>');
 if (!html.includes('seller-app-v70.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/seller-app-v70.css?v=70">\n</head>');
-if (!html.includes('role-gate-v71.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/role-gate-v71.css?v=71">\n</head>');
+if (!html.includes('role-gate-v71.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/role-gate-v71.css?v=81">\n</head>');
 if (!html.includes('runtime-v80.css')) html = html.replace('</head>', '  <link rel="stylesheet" href="/runtime-v80.css?v=80">\n</head>');
 
-// Resolve account role before legacy UI can flash the wrong experience.
+// Fast non-blocking role bootstrap. It never hides the whole app.
 if (!html.includes('role-gate-v71.js')) {
   html = html.replace(
     '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>',
-    '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>\n  <script src="/role-gate-v71.js?v=71"></script>'
+    '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>\n  <script src="/role-gate-v71.js?v=81"></script>'
   );
 }
 
@@ -43,9 +42,8 @@ if (!html.includes('buyer-region-v53.js')) html = html.replace('</body>', '  <sc
 if (!html.includes('product-v60.js')) html = html.replace('</body>', '  <script src="/product-v60.js?v=60"></script>\n</body>');
 if (!html.includes('runtime-v61.js')) html = html.replace('</body>', '  <script src="/runtime-v61.js?v=61"></script>\n</body>');
 if (!html.includes('account-v62.js')) html = html.replace('</body>', '  <script src="/account-v62.js?v=62"></script>\n</body>');
-// V70 JavaScript is intentionally retired: V80 owns seller rendering and navigation.
-if (!html.includes('seller-app-v80.js')) html = html.replace('</body>', '  <script src="/seller-app-v80.js?v=80"></script>\n</body>');
-if (!html.includes('runtime-v80.js')) html = html.replace('</body>', '  <script src="/runtime-v80.js?v=80"></script>\n</body>');
+if (!html.includes('seller-app-v80.js')) html = html.replace('</body>', '  <script src="/seller-app-v80.js?v=81"></script>\n</body>');
+if (!html.includes('runtime-v80.js')) html = html.replace('</body>', '  <script src="/runtime-v80.js?v=81"></script>\n</body>');
 writeFileSync('dist/index.html', html);
 
-console.log('Junta V80 single-controller runtime and fast seller app ready');
+console.log('Junta V81 nonblocking boot, cached role and fast runtime ready');
