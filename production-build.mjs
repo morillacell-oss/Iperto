@@ -9,6 +9,7 @@ const steps=[
   'postbuild-v111-buyer-tiers.mjs',
   'postbuild-v112-order-flow.mjs',
   'postbuild-v113-hardening.mjs',
+  'postbuild-v114-review.mjs',
 ];
 for(const step of steps){
   console.log(`\n▶ ${step}`);
