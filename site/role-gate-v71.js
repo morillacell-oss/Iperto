@@ -21,8 +21,8 @@
     const wrap=$('.avatar-mini'),label=$('.account-label'),pill=$('.account-pill');if(!wrap)return;
     wrap.classList.remove('has-business-logo');wrap.replaceChildren();
     if(role==='seller'&&business?.logo_url){const img=document.createElement('img');img.src=business.logo_url;img.alt=business.name||'Logo da empresa';wrap.appendChild(img);wrap.classList.add('has-business-logo');if(label)label.textContent=business.name||'Empresa';if(pill)pill.setAttribute('aria-label',`Conta da empresa ${business.name||''}`.trim());return;}
-    if(role==='buyer'){wrap.textContent=initials(profile?.display_name||session?.user?.email?.split('@')[0]||'J');if(label)label.textContent=profile?.display_name||'Conta';return;}
-    if(role==='seller'){wrap.textContent=initials(business?.name||profile?.display_name||'E');if(label)label.textContent=business?.name||'Empresa';return;}
+    if(role==='buyer'){wrap.textContent=initials(profile?.display_name||session?.user?.user_metadata?.display_name||session?.user?.email?.split('@')[0]||'J');if(label)label.textContent=profile?.display_name||session?.user?.user_metadata?.display_name||'Conta';return;}
+    if(role==='seller'){wrap.textContent=initials(business?.name||profile?.display_name||session?.user?.user_metadata?.display_name||'E');if(label)label.textContent=business?.name||'Empresa';return;}
     wrap.textContent='J';if(label)label.textContent='Entrar';
   }
   function setActiveView(view){
@@ -32,11 +32,7 @@
       Object.entries(labels).forEach(([k,t])=>{const n=$(`.nav-item[data-nav="${k}"]`);if(n){n.style.display='flex';const s=n.querySelector('span');if(s)s.textContent=t}});
     }
   }
-  function emitReady(){
-    if(readySent)return;readySent=true;
-    document.documentElement.classList.remove('junta-role-checking');document.documentElement.classList.add('junta-role-ready');
-    document.dispatchEvent(new CustomEvent('junta:v71-role-ready',{detail:{role}}));
-  }
+  function emitReady(){if(readySent)return;readySent=true;document.documentElement.classList.remove('junta-role-checking');document.documentElement.classList.add('junta-role-ready');document.dispatchEvent(new CustomEvent('junta:v71-role-ready',{detail:{role}}));}
   function openSeller(section='dashboard'){
     setActiveView('seller');
     if(window.JuntaSellerApp?.show){window.JuntaSellerApp.show(section);return;}
@@ -47,29 +43,36 @@
     if(guardInstalled)return;guardInstalled=true;
     window.addEventListener('click',e=>{
       if(role!=='seller')return;
-      const brand=e.target?.closest?.('.brand'),nav=e.target?.closest?.('[data-nav]');
-      if(!brand&&!nav)return;
-      const view=brand?'home':nav?.dataset.nav;
-      if(!['home','offers','seller'].includes(view))return;
-      e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-      openSeller(view==='offers'?'offers':view==='seller'?'groups':'dashboard');
+      const brand=e.target?.closest?.('.brand'),nav=e.target?.closest?.('[data-nav]');if(!brand&&!nav)return;
+      const view=brand?'home':nav?.dataset.nav;if(!['home','offers','seller'].includes(view))return;
+      e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openSeller(view==='offers'?'offers':view==='seller'?'groups':'dashboard');
     },true);
   }
   function applyCached(){
     const c=readCache();if(!c||Date.now()-Number(c.at||0)>7*86400000)return;
     role=c.role||'guest';profile=c.profile||null;business=c.business||null;setBodyRole();avatar();
-    if(role==='seller'&&business?.onboarding_complete){setActiveView('seller');installGuard();}
+    if(role==='seller'){setActiveView('seller');installGuard();}
+  }
+  function applySessionMetadata(){
+    if(!session)return;
+    const meta=session.user?.user_metadata||{};
+    const provisional=meta.account_type;
+    if(provisional==='seller'||provisional==='buyer')role=provisional;
+    profile=profile||{user_id:session.user.id,role,display_name:meta.display_name||''};
+    setBodyRole();avatar();
+    if(role==='seller'){setActiveView('seller');installGuard();}
   }
   async function validate(){
     if(!db)return;
     try{
-      const {data:{session:s}}=await timeout(db.auth.getSession(),1200);session=s;
+      const {data:{session:s}}=await timeout(db.auth.getSession(),900);session=s;
       if(!session){role='guest';profile=null;business=null;clearCache();setBodyRole();avatar();return;}
       const cached=readCache();if(cached?.userId&&cached.userId!==session.user.id){clearCache();role='guest';profile=null;business=null;}
-      const {data:p,error:pErr}=await timeout(db.from('profiles').select('*').eq('user_id',session.user.id).maybeSingle(),1800);if(pErr)throw pErr;
-      profile=p;role=p?.role||'buyer';business=null;
+      applySessionMetadata();emitReady();
+      const {data:p,error:pErr}=await timeout(db.from('profiles').select('*').eq('user_id',session.user.id).maybeSingle(),1600);if(pErr)throw pErr;
+      profile=p||profile;role=profile?.role||role||'buyer';business=null;
       if(role==='seller'){
-        const {data:b,error:bErr}=await timeout(db.from('businesses').select('*').eq('owner_id',session.user.id).order('created_at',{ascending:true}).limit(1).maybeSingle(),1800);if(bErr)throw bErr;business=b;
+        const {data:b,error:bErr}=await timeout(db.from('businesses').select('*').eq('owner_id',session.user.id).order('created_at',{ascending:true}).limit(1).maybeSingle(),1600);if(bErr)throw bErr;business=b;
       }
       setBodyRole();avatar();saveCache();
       if(role==='seller'&&business?.onboarding_complete){setActiveView('seller');installGuard();openSeller('dashboard');}
@@ -77,7 +80,7 @@
   }
   async function boot(){
     if(booting)return;booting=true;applyCached();
-    const watchdog=setTimeout(emitReady,650);
+    const watchdog=setTimeout(emitReady,450);
     try{await validate();}finally{clearTimeout(watchdog);emitReady();booting=false;}
   }
   window.JuntaRoleGate={get role(){return role},get profile(){return profile},get business(){return business},initials,avatar,openSeller};
