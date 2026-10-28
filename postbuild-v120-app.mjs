@@ -16,7 +16,8 @@ writeFileSync(appPath,app);
 const cssPath='dist/app-v100.css';
 let css=readFileSync(cssPath,'utf8');
 const polish=readFileSync('patches/buyer-app-v120.cssfrag','utf8');
-css+=`\n${polish}\n`;
+const videoFinal=readFileSync('patches/video-v121-final.cssfrag','utf8');
+css+=`\n${polish}\n${videoFinal}\n`;
 writeFileSync(cssPath,css);
 
 const mustCopy=[
