@@ -34,10 +34,11 @@ for(const [src,dst] of mustCopy){if(!existsSync(src))throw new Error(`V120 missi
 
 const indexPath='dist/index.html';
 let index=readFileSync(indexPath,'utf8')
-  .replace(/app-v100\.css\?v=\d+/g,'app-v100.css?v=120')
-  .replace(/app-v100\.js\?v=\d+/g,'app-v100.js?v=120')
+  .replace(/app-v100\.css\?v=\d+/g,'app-v100.css?v=121')
+  .replace(/app-v100\.js\?v=\d+/g,'app-v100.js?v=121')
   .replace(/<meta name="theme-color" content="[^"]+"\s*\/>/,'<meta name="theme-color" content="#ef3f3a" />');
 if(!index.includes('apple-touch-icon'))index=index.replace('</head>','  <link rel="apple-touch-icon" href="/icons/icon-192.png" />\n</head>');
-if(!index.includes('/pwa-v120.js'))index=index.replace('</body>','  <script defer src="/pwa-v120.js?v=120"></script>\n</body>');
+if(!index.includes('/pwa-v120.js'))index=index.replace('</body>','  <script defer src="/pwa-v120.js?v=121"></script>\n</body>');
+else index=index.replace(/pwa-v120\.js\?v=\d+/g,'pwa-v120.js?v=121');
 writeFileSync(indexPath,index);
-console.log('JUNTA V120 app experience + PWA ready');
+console.log('JUNTA V121 buyer video layout ready');
