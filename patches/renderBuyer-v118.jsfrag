@@ -13,24 +13,17 @@
     const subtitle=tab==='groups'?'Acompanhe os grupos em que você entrou.':region?`Seu CEP está ativo em ${esc(region)}. Aqui aparecem grupos reais aprovados da sua região.`:'Informe seu CEP uma vez e o JUNTA procura grupos reais na sua região.';
     let videoHidden=false;
     try{videoHidden=localStorage.getItem('junta_buyer_intro_hidden_v1')==='1'}catch(_e){}
-    const welcomeVideo=tab==='home'&&!videoHidden?`<section class="j-buyer-video-hero" id="buyerWelcomeVideo" aria-label="Como funciona o JUNTA">
+    const welcomeVideo=tab==='home'&&!videoHidden?`<section class="j-buyer-video-hero j-video-youtube" id="buyerWelcomeVideo" aria-label="Como funciona o JUNTA">
       <button class="j-video-dismiss" id="dismissBuyerVideo" type="button" aria-label="Fechar apresentação">×</button>
       <div class="j-buyer-video-frame">
-        <video class="j-welcome-video" autoplay muted loop playsinline preload="metadata" aria-label="Apresentação do JUNTA">
+        <video class="j-welcome-video" controls playsinline preload="metadata" aria-label="Apresentação do JUNTA">
           <source src="/assets/junta-apresentacao.mp4" type="video/mp4">
         </video>
-        <span class="j-video-duration">20 SEG</span>
-        <span class="j-video-live"><i></i> COMO FUNCIONA</span>
       </div>
       <div class="j-buyer-video-copy">
-        <span class="j-video-eyebrow"><i></i> SEU NOVO JEITO DE PEDIR</span>
-        <h2>Junta gente.<br>Baixa o preço.</h2>
-        <p>Digite seu CEP, encontre uma oferta perto de você e escolha a meta que quer alcançar. Quando o grupo completa, todo mundo paga menos.</p>
-        <div class="j-video-steps">
-          <span><b>1</b> Seu CEP</span>
-          <span><b>2</b> Sua meta</span>
-          <span><b>3</b> Preço menor</span>
-        </div>
+        <span class="j-video-eyebrow"><i></i> COMO FUNCIONA</span>
+        <h2>Entenda o JUNTA em 20 segundos</h2>
+        <p>Veja como encontrar uma oferta, entrar no grupo e pagar menos quando a meta for atingida.</p>
       </div>
     </section>`:'';
     app.innerHTML=`<div class="j-shell j-app-shell j-buyer-shell">
