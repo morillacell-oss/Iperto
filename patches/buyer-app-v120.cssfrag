@@ -1,0 +1,99 @@
+/* JUNTA V120 — mobile-first buyer app polish + PWA install */
+*,*::before,*::after{box-sizing:border-box}
+body[data-role="buyer"]{background:linear-gradient(180deg,#fffaf8 0,#fff 42%,#fffaf8 100%)}
+body[data-role="buyer"] .j-topbar{background:rgba(255,250,248,.88)!important;backdrop-filter:blur(18px) saturate(1.18);-webkit-backdrop-filter:blur(18px) saturate(1.18);border-bottom:1px solid rgba(80,45,32,.06)!important;box-shadow:0 7px 28px rgba(52,27,18,.04)!important}
+body[data-role="buyer"] .j-brand{letter-spacing:-.025em}
+body[data-role="buyer"] .j-brand-mark{filter:drop-shadow(0 5px 9px rgba(238,48,45,.17))}
+.j-buyer-shell{max-width:1120px!important}
+.j-buyer-body-v118{min-width:0}
+
+/* Offer card: one media badge only; savings lives with price so nothing can overlap. */
+.j-buyer-promo-card{position:relative!important;text-align:left!important;contain:layout paint;transition:transform .18s ease,box-shadow .18s ease!important}
+.j-buyer-card-media{isolation:isolate!important}
+.j-buyer-card-media>img{z-index:0!important}
+.j-buyer-card-badges{position:absolute!important;z-index:4!important;top:14px!important;left:14px!important;right:auto!important;bottom:auto!important;display:block!important;width:auto!important;max-width:calc(100% - 28px)!important;pointer-events:none!important}
+.j-buyer-card-badges .j-badge{position:static!important;inset:auto!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;max-width:100%!important;min-height:32px!important;margin:0!important;padding:8px 11px!important;border-radius:999px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;font-size:9px!important;line-height:1!important;font-weight:950!important;letter-spacing:.055em!important;box-shadow:0 9px 22px rgba(25,14,10,.16)!important}
+.j-buyer-card-badges .j-badge.open{background:rgba(25,19,17,.86)!important;color:#fff!important;border:1px solid rgba(255,255,255,.16)!important;backdrop-filter:blur(11px)}
+.j-buyer-card-badges .j-badge.success{background:rgba(225,255,241,.96)!important;color:#087651!important;border:1px solid rgba(255,255,255,.72)!important}
+.j-achieved-ribbon{position:absolute;z-index:4;right:13px;bottom:13px;display:inline-flex;align-items:center;min-height:30px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.94);color:#0b7d58;border:1px solid rgba(255,255,255,.72);box-shadow:0 8px 20px rgba(22,86,61,.13);font-size:8.5px;font-weight:950;letter-spacing:.06em}
+.j-buyer-card-body{min-width:0!important}
+.j-price-showcase{align-items:stretch!important}
+.j-price-showcase>div{display:flex;flex-direction:column;justify-content:center;min-height:82px!important;overflow:hidden}
+.j-price-best strong{white-space:nowrap}
+.j-saving-chip{display:inline-flex!important;align-items:center!important;align-self:flex-start!important;max-width:100%!important;margin-top:7px!important;padding:6px 8px!important;border-radius:999px!important;background:rgba(238,49,45,.08)!important;color:#d92b29!important;font-size:9px!important;line-height:1!important;font-weight:900!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.j-my-target,.j-first-tier{position:relative!important;z-index:1!important;overflow:hidden!important}
+.j-my-target.achieved{background:linear-gradient(135deg,#eafff5,#f5fffa)!important;border:1px solid rgba(9,139,91,.16)!important;box-shadow:inset 0 1px rgba(255,255,255,.8)!important}
+.j-my-target.achieved span{color:#087651!important}
+.j-card-cta span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Welcome video behaves like a product onboarding card, not a giant banner. */
+.j-buyer-video-hero{position:relative!important;margin:14px 0 22px!important;border-radius:28px!important;box-shadow:0 18px 46px rgba(52,27,18,.075)!important}
+.j-buyer-video-frame{background:#15100f!important}
+.j-welcome-video{cursor:pointer}
+.j-video-dismiss{z-index:7!important}
+.j-video-live{z-index:3}
+.j-buyer-video-copy h2{max-width:420px}
+
+/* Native-looking install suggestion. Injected only for buyers and only when install is available. */
+.j-install-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:13px;margin:14px 0 18px;padding:13px 14px;border:1px solid rgba(78,43,30,.08);border-radius:22px;background:linear-gradient(135deg,#fff 0%,#fff7f5 100%);box-shadow:0 14px 35px rgba(52,28,19,.065);animation:jInstallIn .34s cubic-bezier(.2,.8,.2,1) both}
+.j-install-icon{width:48px;height:48px;border-radius:15px;overflow:hidden;box-shadow:0 9px 20px rgba(237,45,44,.19);flex:none}
+.j-install-icon img{display:block;width:100%;height:100%;object-fit:cover}
+.j-install-copy{min-width:0}
+.j-install-copy small{display:block;margin-bottom:3px;color:#e4322f;font-size:8.5px;font-weight:950;letter-spacing:.1em}
+.j-install-copy strong{display:block;color:#1e1714;font-size:14px;line-height:1.12;letter-spacing:-.015em}
+.j-install-copy span{display:block;margin-top:4px;color:#786c66;font-size:10.5px;line-height:1.3}
+.j-install-actions{display:flex;align-items:center;gap:6px}
+.j-install-btn{appearance:none;border:0;border-radius:13px;min-height:40px;padding:0 13px;background:linear-gradient(135deg,#ff4942,#eb292c);color:#fff;font-size:11px;font-weight:950;box-shadow:0 9px 18px rgba(235,41,44,.18);cursor:pointer}
+.j-install-close{appearance:none;border:0;width:34px;height:34px;border-radius:12px;background:#f7f1ee;color:#8b7e77;font-size:18px;line-height:1;cursor:pointer}
+.j-install-ios{grid-column:2/-1;margin-top:-5px;color:#766a64;font-size:10px;line-height:1.35}
+@keyframes jInstallIn{from{opacity:0;transform:translateY(-7px) scale(.985)}to{opacity:1;transform:none}}
+
+/* Bottom nav and mobile spacing */
+.j-bottom-nav{border:1px solid rgba(77,43,31,.08)!important;background:rgba(255,255,255,.94)!important;backdrop-filter:blur(20px) saturate(1.15)!important;-webkit-backdrop-filter:blur(20px) saturate(1.15)!important;box-shadow:0 17px 42px rgba(44,25,18,.14)!important}
+.j-bottom-nav button.active{background:linear-gradient(145deg,#fff2ef,#ffe8e4)!important;box-shadow:inset 0 1px rgba(255,255,255,.9)!important}
+
+@media(max-width:620px){
+  body[data-role="buyer"] .j-topbar-inner{min-height:68px!important}
+  .j-buyer-shell{width:calc(100% - 20px)!important;padding-top:7px!important}
+  .j-buyer-header-v118 h1{font-size:34px!important;line-height:1!important;margin-top:8px!important}
+  .j-buyer-header-v118 p{font-size:12.5px!important}
+  .j-buyer-video-hero{grid-template-columns:1fr!important;border-radius:23px!important;margin-top:12px!important}
+  .j-buyer-video-frame{aspect-ratio:16/9!important}
+  .j-buyer-video-copy{padding:15px 16px 16px!important}
+  .j-buyer-video-copy h2{font-size:25px!important;line-height:1.02!important;margin:10px 0 7px!important}
+  .j-buyer-video-copy p{font-size:11.5px!important;line-height:1.42!important}
+  .j-video-steps{margin-top:12px!important;gap:6px!important}
+  .j-video-steps span{min-height:62px!important;padding:8px!important;font-size:9.2px!important}
+  .j-buyer-section-head h2{font-size:27px!important}
+  .j-buyer-section-head p{font-size:12.5px!important}
+  .j-buyer-promo-card{border-radius:24px!important;box-shadow:0 14px 34px rgba(54,29,20,.07)!important}
+  .j-buyer-card-media{aspect-ratio:1.42/1!important}
+  .j-buyer-card-badges{top:11px!important;left:11px!important;right:auto!important;max-width:calc(100% - 22px)!important}
+  .j-buyer-card-badges .j-badge{min-height:29px!important;padding:7px 9px!important;font-size:8.2px!important}
+  .j-achieved-ribbon{right:10px;bottom:10px;min-height:27px;padding:6px 8px;font-size:7.8px}
+  .j-buyer-card-body{padding:15px 15px 16px!important}
+  .j-store-line{margin-bottom:10px!important}
+  .j-buyer-card-body h3{font-size:24px!important;margin-bottom:13px!important}
+  .j-price-showcase{grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr)!important;gap:7px!important;margin-bottom:10px!important}
+  .j-price-showcase>div{min-height:76px!important;padding:11px!important;border-radius:16px!important}
+  .j-price-showcase small{font-size:7.8px!important;margin-bottom:5px!important}
+  .j-price-normal s{font-size:14px!important}
+  .j-price-best strong{font-size:25px!important}
+  .j-saving-chip{font-size:8.3px!important;padding:5px 7px!important;margin-top:6px!important}
+  .j-progress-copy{font-size:10.5px!important;margin:8px 0 11px!important}
+  .j-card-cta{min-height:49px!important;border-radius:15px!important}
+  .j-safe-copy{font-size:8.8px!important}
+  .j-install-card{grid-template-columns:auto minmax(0,1fr);gap:10px;padding:11px;border-radius:19px}
+  .j-install-icon{width:44px;height:44px;border-radius:14px}
+  .j-install-actions{grid-column:1/-1;width:100%;display:grid;grid-template-columns:1fr 38px}
+  .j-install-btn{width:100%;min-height:42px}
+  .j-install-close{width:38px;height:38px}
+  .j-install-ios{grid-column:1/-1;margin-top:0}
+  .j-bottom-nav{width:calc(100% - 14px)!important;bottom:max(6px,env(safe-area-inset-bottom))!important;border-radius:23px!important}
+}
+@media(max-width:350px){
+  .j-price-showcase{grid-template-columns:1fr!important}
+  .j-video-steps{grid-template-columns:1fr!important}
+  .j-video-steps span{display:flex!important;min-height:auto!important}
+}
+@media(prefers-reduced-motion:reduce){.j-install-card{animation:none}.j-buyer-promo-card{transition:none!important}}

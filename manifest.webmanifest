@@ -1,1 +1,19 @@
-{"name":"Junta","short_name":"Junta","start_url":"/","display":"standalone","background_color":"#fff8f5","theme_color":"#ef3f3a","icons":[]}
+{
+  "id": "/",
+  "name": "JUNTA — Compre junto. Pague menos.",
+  "short_name": "JUNTA",
+  "description": "Encontre grupos perto de você, junte pessoas e pague menos quando a meta for atingida.",
+  "lang": "pt-BR",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fffaf7",
+  "theme_color": "#ef3f3a",
+  "categories": ["shopping", "food", "lifestyle"],
+  "icons": [
+    {"src":"/icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"/icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"/icons/icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+  ]
+}

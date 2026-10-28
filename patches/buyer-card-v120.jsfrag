@@ -1,0 +1,47 @@
+  function buyerOfferCard(o,joined,membership){
+    const cancelled=o.status==='cancelled'||membership?.status==='cancelled';
+    const s=statsOf(o),w=Number(s.waitlist_count||0),target=Number(o.queue_target||25),p=pct(w,target),b=businessOf(o),tiers=tiersOf(o);
+    const firstTier=tiers[0],bestTier=tiers[tiers.length-1];
+    const regular=Number(o.regular_price||0),firstPrice=Number(firstTier?.unit_price||o.junta_price||0),bestPrice=Number(bestTier?.unit_price||o.junta_price||0),saving=Math.max(0,regular-bestPrice);
+    const selectedTarget=Number(membership?.target_people||0);
+    const selectedTier=tiers.find(t=>Number(t.people_count)===selectedTarget);
+    const selectedRemaining=selectedTarget?tierRemaining(o,selectedTarget):0;
+    const run=selectedTarget?tierRunFor(o,selectedTarget):null;
+    const order=selectedTarget?buyerOrderFor(o,selectedTarget):null;
+    if(cancelled){
+      return `<button class="j-offer j-buyer-promo-card j-offer-cancelled" data-buyer-offer="${o.id}"><div class="j-offer-img j-buyer-card-media">${o.image_url?`<img src="${esc(o.image_url)}" alt="${esc(o.title)}">`:''}<div class="j-buyer-card-badges"><span class="j-badge cancelled">GRUPO CANCELADO</span></div></div><div class="j-offer-body j-buyer-card-body"><div class="j-store-line">${b.logo_url?`<span class="j-store-logo"><img src="${esc(b.logo_url)}" alt="${esc(b.name||'Loja')}"></span>`:''}<div><small>OFERTA DE</small><strong>${esc(b.name||'Comércio')}</strong></div></div><h3>${esc(o.title)}</h3><div class="j-cancelled-note"><strong>GRUPO CANCELADO</strong><span>INCOMPLETO</span><small>${esc(membership?.cancellation_reason||o.cancel_reason||'Este grupo foi encerrado pelo vendedor.')}</small></div></div></button>`;
+    }
+    const progressText=w===0?'Grupo começando agora — seja um dos primeiros':w===1?'1 pessoa já entrou nesta oferta':`${w} pessoas já entraram nesta oferta`;
+    let targetBlock='';
+    if(joined&&selectedTarget&&selectedTier){
+      if(run){
+        targetBlock=`<div class="j-my-target achieved"><span>🎉 META ATINGIDA</span><strong>${selectedTarget} pessoas · ${money(selectedTier.unit_price)}</strong><small>${order?`Seu pedido: ${orderStatusLabel(order.status)}`:'Preço liberado. Finalize seu pedido agora.'}</small></div>`;
+      }else{
+        targetBlock=`<div class="j-my-target"><span>SUA META</span><strong>${selectedTarget} pessoas · ${money(selectedTier.unit_price)}</strong><small>${selectedRemaining===1?'Falta 1 pessoa':`Faltam ${selectedRemaining} pessoas`}</small></div>`;
+      }
+    }else if(joined){
+      targetBlock=`<div class="j-my-target needs-choice"><span>FALTA ESCOLHER</span><strong>Escolha sua meta de preço</strong><small>Seu cadastro está no grupo, mas ainda sem uma faixa definida.</small></div>`;
+    }else if(firstTier){
+      targetBlock=`<div class="j-first-tier"><span>Primeira meta</span><strong>${firstTier.people_count} pessoas → ${money(firstPrice)}</strong></div>`;
+    }
+    const cta=run?(order?'Ver meu pedido':'Finalizar pedido'):joined?'Acompanhar minha meta':'Escolher meta e entrar';
+    return `<button class="j-offer j-buyer-promo-card ${run?'j-offer-achieved':''}" data-buyer-offer="${o.id}">
+      <div class="j-offer-img j-buyer-card-media">
+        ${o.image_url?`<img src="${esc(o.image_url)}" alt="${esc(o.title)}">`:''}
+        <div class="j-buyer-card-badges"><span class="j-badge ${run?'success':'open'}">${run?'✓ META ATINGIDA':'● GRUPO ABERTO'}</span></div>
+        ${run?`<span class="j-achieved-ribbon">PREÇO LIBERADO</span>`:''}
+      </div>
+      <div class="j-offer-body j-buyer-card-body">
+        <div class="j-store-line">${b.logo_url?`<span class="j-store-logo"><img src="${esc(b.logo_url)}" alt="${esc(b.name||'Loja')}"></span>`:''}<div><small>OFERTA DE</small><strong>${esc(b.name||'Comércio local')}</strong></div></div>
+        <h3>${esc(o.title)}</h3>
+        <div class="j-price-showcase">
+          <div class="j-price-normal"><small>PREÇO NORMAL</small><s>${money(regular)}</s></div>
+          <div class="j-price-best"><small>NO JUNTA PODE CHEGAR A</small><strong>${money(bestPrice)}</strong>${saving>0?`<span class="j-saving-chip">↓ Economize ${money(saving)}</span>`:''}</div>
+        </div>
+        ${targetBlock}
+        <div class="j-progress-wrap"><div class="j-progress"><i style="width:${p}%"></i></div><div class="j-progress-meta"><span>${w} pessoa${w===1?'':'s'} na oferta</span><span>${Math.max(0,target-w)} até a meta</span></div></div>
+        <p class="j-progress-copy">${run?'Sua faixa fechou. O preço escolhido está liberado.':progressText}</p>
+        <span class="j-card-cta ${run?'success':''}"><span>${cta}</span><b>→</b></span><small class="j-safe-copy">${run?'Confira os dados antes de enviar o pedido ao estabelecimento.':'Sem cobrança agora. Você acompanha tudo pelo JUNTA.'}</small>
+      </div>
+    </button>`;
+  }

@@ -14,6 +14,7 @@ const steps=[
   'postbuild-v116-premium.mjs',
   'postbuild-v117-wow.mjs',
   'postbuild-v118-refine.mjs',
+  'postbuild-v120-app.mjs',
 ];
 for(const step of steps){
   console.log(`\n▶ ${step}`);
